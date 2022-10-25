@@ -1,11 +1,11 @@
 #[derive(Debug, Clone)]
 struct PrimeField {
-    char: u16,
+    char: u32,
     num: i64,
 }
 
 impl PrimeField {
-    fn new(char: u16, num: i64) -> PrimeField {
+    fn new(char: u32, num: i64) -> PrimeField {
         let new_num = num % char as i64;
         PrimeField { char, num: new_num }
     }
@@ -226,86 +226,76 @@ fn adjust_function(func: Vec<PrimeField>) -> Vec<PrimeField> {
     }
     f
 }
+fn get_primitive_polynomial(char:u32, n:u32)-> Vec<PrimeField>{
+	let mut answer:Vec<PrimeField> = vec![];
+	
+	for i in 0..((char as u32).pow(n as u32) ) {
+		// f :nth order monic polynomial on F_p
+		let mut f = change_base_from10_to_n(i.into(), char.into());
+		for j in 0..(n as usize) - f.len() + 1 {
+			f.push(0);
+		}
+		f.pop();
+		f.push(1);
+		let f: Vec<PrimeField> = f
+			.into_iter()
+			.map(|x| PrimeField::new(char, x as i64))
+			.collect();
+
+		let f_num: Vec<i64> = f.clone().into_iter().map(|x| x.num).collect();
+
+		let mut end_flag: bool = true;
+
+		// g = x
+		let mut g: Vec<PrimeField> = vec![
+			PrimeField::new(char as u32, 0),
+			PrimeField::new(char as u32, 1),
+		];
+
+		for m in 0..(n / 2) {
+			let g_temp: Vec<PrimeField> = g.clone();
+
+			// g^p
+			for j in 0..char - 1 {
+				g = function_multiple(&g, &g_temp);
+			}
+
+			// g = g^p mod f
+			g = function_div(g, f.clone()).1;
+
+			let mut g_2 = g.clone();
+			// g^p-1 mod f
+			if g_2.len() == 0 {
+				g_2.push(PrimeField::new(char as u32, 0));
+				g_2.push(PrimeField::new(char as u32, (char - 1).into()));
+			} else if g_2.len() == 1 {
+				g_2.push(PrimeField::new(char as u32, (char - 1).into()));
+			} else {
+				g_2[1] = g_2[1].sub(&PrimeField::new(char, 1));
+			}
+			g_2 = adjust_function(g_2);
+
+
+			let mut h = gcd(f.clone(), g_2);
+			h = adjust_function(h);
+			if !(h.len() <= 1 && h[0].num == 1) {
+				end_flag = false;
+				break;
+			}
+		}
+
+		if end_flag == true {
+			answer = f;
+			break;
+		}
+	}
+	answer
+
+}
 fn main() {
     let char = 5;
-    let n = 5;
-    // let f = vec![PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 0), PrimeField::new(char as u16, 1)];
-    // let g = vec![PrimeField::new(char as u16, 0), PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 1)];
-    // let f = vec![PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 1)];
-    // let g = vec![PrimeField::new(char as u16, 1)];
+    let n = 10;
+	let primitive_func = get_primitive_polynomial(char, n);
+	println!("{:?}", primitive_func);
 
-    // let (quotient, remainder) = function_div(f.clone(), g.clone());
-    // println!("f= {:?}",f);
-    // println!("g= {:?}",g);
-    // println!("quotient = {:?}", quotient);
-    // println!("remainder = {:?}", remainder);
-
-    for i in 2..((char as u32).pow(n as u32) ) {
-        println!("i = {}", i);
-        // for i in 1..((char as u32).pow(n as u32)) {
-        // f :nth order monic polynomial on F_p
-        let mut f = change_base_from10_to_n(i.into(), char.into());
-        for j in 0..n - f.len() + 1 {
-            f.push(0);
-        }
-        f.pop();
-        f.push(1);
-        let f: Vec<PrimeField> = f
-            .into_iter()
-            .map(|x| PrimeField::new(char, x as i64))
-            .collect();
-
-        let f_num: Vec<i64> = f.clone().into_iter().map(|x| x.num).collect();
-        println!("f = {:?}", f_num);
-
-        let mut end_flag: bool = true;
-
-        // g = x
-        let mut g: Vec<PrimeField> = vec![
-            PrimeField::new(char as u16, 0),
-            PrimeField::new(char as u16, 1),
-        ];
-
-        for m in 0..(n / 2) {
-            let g_temp: Vec<PrimeField> = g.clone();
-
-            // g^p
-            for j in 0..char - 1 {
-                g = function_multiple(&g, &g_temp);
-            }
-            // println!("g^p = {:?}", g);
-
-            // g = g^p mod f
-            g = function_div(g, f.clone()).1;
-
-            // println!("g^p mod f = {:?}", g);
-            //let mut g = pow_e_mod_f(g.clone(), f.clone(), char as u32, char);
-
-            let mut g_2 = g.clone();
-            // g^p-1 mod f
-            if g_2.len() == 0 {
-                g_2.push(PrimeField::new(char as u16, 0));
-                g_2.push(PrimeField::new(char as u16, (char - 1).into()));
-            } else if g_2.len() == 1 {
-                g_2.push(PrimeField::new(char as u16, (char - 1).into()));
-            } else {
-                g_2[1] = g_2[1].sub(&PrimeField::new(char, 1));
-            }
-            g_2 = adjust_function(g_2);
-            // println!("g^p-1 mod f = {:?}", g_2);
-            let mut h = gcd(f.clone(), g_2);
-
-            h = adjust_function(h);
-            println!("h = {:?}", h);
-            if !(h.len() <= 1 && h[0].num == 1) {
-                end_flag = false;
-                break;
-            }
-        }
-
-        if end_flag == true {
-            println!("answer = {:?}", f);
-            break;
-        }
-    }
 }
