@@ -1,10 +1,11 @@
+use std::ops;
 // type of number , ex: i32
 type NumType = i32;
 
 #[derive(Debug)]
 enum Element{
 	PrimeField(NumType),
-	PolynomialField(Vec<NumType>),
+	Polynomial(Vec<NumType>),
 	GaloisField(Vec<NumType>,Vec<NumType>),
 }
 
@@ -12,32 +13,6 @@ struct FiniteField {
     char: u32,
     element: Element,
 }
-
-// polynomial
-// impl FiniteField{
-//     fn add(&self, other: &FiniteField<Vec<NumType>>) ->FiniteField<Vec<NumType>>{
-// 		let mut result_elements = Vec::new();
-// 		let mut f:Vec<NumType> = Vec::new();
-// 		let mut g:Vec<NumType> = Vec::new();
-
-// 		if self.element.len() > other.element.len() {
-// 			f =  self.element.clone();
-// 			g =  other.element.clone();
-// 		}
-// 		else{
-// 			f =  other.element.clone();
-// 			g =  self.element.clone();
-
-// 		}
-// 		for i in 0..g.len(){
-// 			result_elements.push(f[i] + g[i]);
-// 		}
-// 		for i in g.len()..f.len(){
-// 			result_elements.push(f[i]);
-// 		}
-// 		FiniteField{char: self.char, element: result_elements}
-// 	}
-// }
 
 // prime fields
 impl FiniteField {
