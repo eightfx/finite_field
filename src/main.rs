@@ -6,7 +6,7 @@ type NumType = i32;
 enum Element{
 	PrimeField(NumType),
 	Polynomial(Vec<NumType>),
-	GaloisField(Vec<NumType>,Vec<NumType>),
+	GaloisField{element:Vec<NumType>,primitive_polynomial:Vec<NumType>},
 }
 
 #[derive(Debug)]
@@ -93,18 +93,18 @@ impl ops::Add for FiniteField {
 					element: Element::Polynomial(result)
 				}
 			}
-			Element::GaloisField(_,_) =>{
+			Element::GaloisField{element:_,primitive_polynomial:_} =>{
 				let mut result:Vec<NumType> = Vec::new();
 				let mut f:Vec<NumType> = Vec::new();
 				let mut g:Vec<NumType> = Vec::new();
 				let mut h:Vec<NumType> = Vec::new();
 
 				// get element from enum
-				if let Element::GaloisField(func_vec,primitive_func) = &self.element {
+				if let Element::GaloisField{element:func_vec,primitive_polynomial:primitive_func} = &self.element {
 					f =  func_vec.clone();
 					h =  primitive_func.clone();
 				}
-				if let Element::GaloisField(func_vec,primitive_func) = &other.element {
+				if let Element::GaloisField{element:func_vec,primitive_polynomial:primitive_func} = &other.element {
 					g =  func_vec.clone();
 					h =  primitive_func.clone();
 				}
@@ -143,7 +143,7 @@ impl ops::Add for FiniteField {
 				let result = drop0(result);
 				FiniteField{
 					char:self.char ,
-					element: Element::GaloisField(result, h)
+					element: Element::GaloisField{element:result, primitive_polynomial:h}
 				}
 			}
 			
@@ -237,18 +237,18 @@ impl ops::Sub for FiniteField {
 					element: Element::Polynomial(result)
 				}
 			}
-			Element::GaloisField(_,_) =>{
+			Element::GaloisField{element:_, primitive_polynomial:_} =>{
 				let mut result:Vec<NumType> = Vec::new();
 				let mut f:Vec<NumType> = Vec::new();
 				let mut g:Vec<NumType> = Vec::new();
 				let mut h:Vec<NumType> = Vec::new();
 
 				// get element from enum
-				if let Element::GaloisField(func_vec,primitive_func) = &self.element {
+				if let Element::GaloisField{element:func_vec,primitive_polynomial:primitive_func} = &self.element {
 					f =  func_vec.clone();
 					h =  primitive_func.clone();
 				}
-				if let Element::GaloisField(func_vec,primitive_func) = &other.element {
+				if let Element::GaloisField{element:func_vec,primitive_polynomial:primitive_func} = &other.element {
 					g =  func_vec.clone();
 					h =  primitive_func.clone();
 				}
@@ -295,9 +295,9 @@ impl ops::Sub for FiniteField {
 				let result = drop0(result);
 				FiniteField{
 					char:self.char ,
-					element: Element::GaloisField(result, h)
+					element: Element::GaloisField{element:result,primitive_polynomial:h}
 				}
-			}
+				}
 			
 
 			
@@ -342,11 +342,11 @@ fn main() {
 	// let element1:Element = Element::Polynomial(vec![1,2,3,4,5]);
 	// let element2:Element = Element::Polynomial(vec![1,2,3,1]);
 	
-	let element1:Element = Element::GaloisField(vec![4,2,3,4,3],vec![2,2,3]);
-	let element2:Element = Element::GaloisField(vec![3,3,3,4,3],vec![2,2,3]);
+	let element1:Element = Element::GaloisField{element:vec![4,2,3,4,3],primitive_polynomial:vec![2,2,3]};
+	let element2:Element = Element::GaloisField{element:vec![1,2,3,1],primitive_polynomial:vec![2,2,3]};
 	
 	let x:FiniteField = FiniteField{char:char,element:element1};
 	let y:FiniteField = FiniteField{char:char,element:element2};
-	println!("{:?}",(x-y).element);
+	println!("{:?}",(y-x).element);
 
 }
