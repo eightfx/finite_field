@@ -15,8 +15,9 @@ struct FiniteField {
 }
 
 // prime fields
-impl FiniteField {
-	fn add(&self, other: &FiniteField) -> FiniteField{
+impl ops::Add for FiniteField {
+	type Output = FiniteField;
+	fn add(self, other: FiniteField) -> FiniteField{
 
 		match self.element {
 			Element::PrimeField(_) =>{
@@ -36,15 +37,15 @@ impl FiniteField {
 					element: Element::PrimeField((x + y) % self.char as NumType)
 				}
 			}
-			Element::PolynomialField(_) =>{
+			Element::Polynomial(_) =>{
 				let mut result:Vec<NumType> = Vec::new();
 				let mut f:Vec<NumType> = Vec::new();
 				let mut g:Vec<NumType> = Vec::new();
 
-				if let Element::PolynomialField(func_vec) = &self.element {
+				if let Element::Polynomial(func_vec) = &self.element {
 					f =  func_vec.clone();
 				}
-				if let Element::PolynomialField(func_vec) = &other.element {
+				if let Element::Polynomial(func_vec) = &other.element {
 					g =  func_vec.clone();
 				}
 
@@ -60,7 +61,7 @@ impl FiniteField {
 				}
 				FiniteField{
 					char: self.char,
-					element: Element::PolynomialField(result)
+					element: Element::Polynomial(result)
 				}
 			}
 			Element::GaloisField(_,_) =>{
@@ -100,19 +101,19 @@ impl FiniteField {
 			
 		}
 	}
-}
+	}
 
 
 fn main() {
 	let char:u32 = 5;
-	// let element1:Element = Element::PrimeField(1 as NumType);
-	// let element2:Element = Element::PrimeField(2 as NumType);
+	let element1:Element = Element::PrimeField(3);
+	let element2:Element = Element::PrimeField(2);
 
-	let element1:Element = Element::GaloisField(vec![1,2,3],vec![2,2,3]);
-	let element2:Element = Element::GaloisField(vec![1,2],vec![2,2,3]);
+	// let element1:Element = Element::GaloisField(vec![1,2,3],vec![2,2,3]);
+	// let element2:Element = Element::GaloisField(vec![1,2],vec![2,2,3]);
 	
 	let x:FiniteField = FiniteField{char:char,element:element1};
 	let y:FiniteField = FiniteField{char:char,element:element2};
-	println!("{:?}",x.add(&y).element);
+	println!("{:?}",(x+y).element);
 
 }
