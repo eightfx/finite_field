@@ -127,210 +127,185 @@ fn function_div(f: Vec<PrimeField>, g: Vec<PrimeField>) -> (Vec<PrimeField>, Vec
         }
     }
 
-	if f_inv.len() >= g_inv.len() {
-		for i in 0..f_inv.len() - g_inv.len() + 1 {
-			let mut temp = f_inv[i].div(&g_inv[0]);
-			for j in 0..g_inv.len() {
-				f_inv[i + j] = f_inv[i + j].sub(&g_inv[j].mul(&temp));
-			}
-			quotient.push(temp);
-		}
-	}
-	else{
-		quotient.push(PrimeField::new(g_inv[0].char, 0));
-	}
+    if f_inv.len() >= g_inv.len() {
+        for i in 0..f_inv.len() - g_inv.len() + 1 {
+            let mut temp = f_inv[i].div(&g_inv[0]);
+            for j in 0..g_inv.len() {
+                f_inv[i + j] = f_inv[i + j].sub(&g_inv[j].mul(&temp));
+            }
+            quotient.push(temp);
+        }
+    } else {
+        quotient.push(PrimeField::new(g_inv[0].char, 0));
+    }
 
-	// drop zero
-	for i in 0..f_inv.len() {
-		if f_inv[0].num != 0 {
-			break;
-		} else {
-			f_inv.remove(0);
-		}
-	}
+    // drop zero
+    for i in 0..f_inv.len() {
+        if f_inv[0].num != 0 {
+            break;
+        } else {
+            f_inv.remove(0);
+        }
+    }
 
-			
-	quotient = quotient.into_iter().rev().collect::<Vec<PrimeField>>();
-	let mut remainder:Vec<PrimeField>;
-	if f_inv.len()== 0 {
-		remainder = vec![PrimeField::new(g_inv[0].char, 0)];
-	}else{
-
-		remainder = f_inv.into_iter().rev().collect::<Vec<PrimeField>>();
-		
-	}
-	(quotient, remainder)
+    quotient = quotient.into_iter().rev().collect::<Vec<PrimeField>>();
+    let mut remainder: Vec<PrimeField>;
+    if f_inv.len() == 0 {
+        remainder = vec![PrimeField::new(g_inv[0].char, 0)];
+    } else {
+        remainder = f_inv.into_iter().rev().collect::<Vec<PrimeField>>();
+    }
+    (quotient, remainder)
 }
 fn change_base_from10_to_n(x: u32, n: u32) -> Vec<u32> {
-	let mut result = Vec::new();
-	let mut x = x;
-	while x > 0 {
-		result.push(x % n);
-		x = x / n;
-	}
-	result
+    let mut result = Vec::new();
+    let mut x = x;
+    while x > 0 {
+        result.push(x % n);
+        x = x / n;
+    }
+    result
 }
 
 fn gcd(
     devided_polynomial: Vec<PrimeField>,
     deviding_polynomial: Vec<PrimeField>,
 ) -> Vec<PrimeField> {
-	// def(devided_polynomial ) > def(deviding_polynomial)
-	let mut f :Vec<PrimeField> = devided_polynomial;
-	let mut g :Vec<PrimeField> = deviding_polynomial;
+    // def(devided_polynomial ) > def(deviding_polynomial)
+    let mut f: Vec<PrimeField> = devided_polynomial;
+    let mut g: Vec<PrimeField> = deviding_polynomial;
+	let mut answer : Vec<PrimeField> = vec![];
 
 	if f.len() < g.len() {
-
-		(f,g) = (g,f);
+		(f, g) = (g, f);
 	}
 
-	loop {
-		// If the number to be divided is 1, end
-		// if g.len() == 1 && g[0].num == 1 {
-		// 	return g;
-		// }
-		// if f.len() == 1 && f[0].num == 0 {
-		// 	return vec![PrimeField::new(f[0].char, 1)];
-		// }
-		let remainder = function_div(f, g).1;
-		(f,g) = (g,remainder);
-
-
-
-		// If the number to be divided is 0, end
-		let mut temp = 0;
-		for i in 0..g.len() {
-			temp += g[i].num as u32;
-		}
-		if temp == 0 {
+    loop {
+        g = adjust_function(g);
+        // If the number to be divided is 1, end
+        if g.len() == 1 && g[0].num == 1 {
+			answer = g;
 			break;
-		}
-	}
-
-	f
-}
-fn pow_e_mod_f(g: Vec<PrimeField>, f: Vec<PrimeField>, e: u32, char: u16) -> Vec<PrimeField> {
-	let mut h_:Vec<PrimeField> = vec![PrimeField::new(char as u16, 1)];
-	let mut g_ = g;
-	let mut e_ = e;
-	while e_ > 0{
-		
-		if e_ % 2 == 1 {
-			h_ = function_div(function_multiple(&h_, &g_), f.clone()).1;
-		}
-		g_ = function_div(function_multiple(&g_, &g_), f.clone()).1;
-		e_ = e_ / 2;
-		
-	}
-
-	h_
-
-
-}
-fn adjust_function(func:Vec<PrimeField>) -> Vec<PrimeField> {
-
-	let mut func_inv = func.clone().into_iter().rev().collect::<Vec<PrimeField>>();
-	// drop zero
-	for i in 0..func_inv.len() {
-		if func_inv[0].num != 0 {
+        } else if g.len() == 1 && g[0].num == 0 {
+            answer =  vec![PrimeField::new(f[0].char, 0)];
 			break;
-		} else {
-			func_inv.remove(0);
-		}
-	}
-	let mut f = func_inv.into_iter().rev().collect::<Vec<PrimeField>>();
-	if f.len() == 0 {
-		f.push(PrimeField::new(func[0].char, 0));
-	}
-	f
+        }
+        // if f.len() == 1 && f[0].num == 0 {
+        // 	return vec![PrimeField::new(f[0].char, 1)];
+        // }
+        let remainder = function_div(f, g.clone()).1;
+        (f, g) = (g, remainder);
+
+
+        // モニック多項式にする
+        for i in 0..f.len() {
+            f[i] = f[i].div(&f[f.len() - 1]);
+        }
+        for i in 0..g.len() {
+            g[i] = g[i].div(&g[g.len() - 1]);
+        }
+
+    }
+
+    answer
+}
+
+fn adjust_function(func: Vec<PrimeField>) -> Vec<PrimeField> {
+    let mut func_inv = func.clone().into_iter().rev().collect::<Vec<PrimeField>>();
+    // drop zero
+    for i in 0..func_inv.len() {
+        if func_inv[0].num != 0 {
+            break;
+        } else {
+            func_inv.remove(0);
+        }
+    }
+    let mut f = func_inv.into_iter().rev().collect::<Vec<PrimeField>>();
+    if f.len() == 0 {
+        f.push(PrimeField::new(func[0].char, 0));
+    }
+    f
 }
 fn main() {
-    let char = 2;
+    let char = 5;
     let n = 5;
-	// let f = vec![PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 0), PrimeField::new(char as u16, 1)];
-	// let g = vec![PrimeField::new(char as u16, 0), PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 1)];
-	// let f = vec![PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 1)];
-	// let g = vec![PrimeField::new(char as u16, 1)];
+    // let f = vec![PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 0), PrimeField::new(char as u16, 1)];
+    // let g = vec![PrimeField::new(char as u16, 0), PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 1)];
+    // let f = vec![PrimeField::new(char as u16, 1), PrimeField::new(char as u16, 1)];
+    // let g = vec![PrimeField::new(char as u16, 1)];
 
-	// let (quotient, remainder) = function_div(f.clone(), g.clone());
-	// println!("f= {:?}",f);
-	// println!("g= {:?}",g);
-	// println!("quotient = {:?}", quotient);
-	// println!("remainder = {:?}", remainder);
-	
-	
+    // let (quotient, remainder) = function_div(f.clone(), g.clone());
+    // println!("f= {:?}",f);
+    // println!("g= {:?}",g);
+    // println!("quotient = {:?}", quotient);
+    // println!("remainder = {:?}", remainder);
 
-	
-	for i in 2..((char as u32).pow(n as u32)) {
-		println!("i = {}", i);
-		// for i in 1..((char as u32).pow(n as u32)) {
-		// f :nth order monic polynomial on F_p
-		let mut f = change_base_from10_to_n(i.into(), char.into());
-		for j in 0..n - f.len() + 1 {
-			f.push(0);
-		}
-		f.pop();
-		f.push(1);
-		let f: Vec<PrimeField> = f
-			.into_iter()
-			.map(|x| PrimeField::new(char, x as i64))
-			.collect();
-		
-		println!("f = {:?}", f);
+    for i in 2..((char as u32).pow(n as u32) ) {
+        println!("i = {}", i);
+        // for i in 1..((char as u32).pow(n as u32)) {
+        // f :nth order monic polynomial on F_p
+        let mut f = change_base_from10_to_n(i.into(), char.into());
+        for j in 0..n - f.len() + 1 {
+            f.push(0);
+        }
+        f.pop();
+        f.push(1);
+        let f: Vec<PrimeField> = f
+            .into_iter()
+            .map(|x| PrimeField::new(char, x as i64))
+            .collect();
 
-		let mut end_flag: bool = true;
+        let f_num: Vec<i64> = f.clone().into_iter().map(|x| x.num).collect();
+        println!("f = {:?}", f_num);
 
-		// g = x
-		let mut g: Vec<PrimeField> = vec![PrimeField::new(char as u16, 0), PrimeField::new(char as u16, 1)];
+        let mut end_flag: bool = true;
 
-		for m in 0..(n/2) {
-			let g_temp:Vec<PrimeField> = g.clone();
+        // g = x
+        let mut g: Vec<PrimeField> = vec![
+            PrimeField::new(char as u16, 0),
+            PrimeField::new(char as u16, 1),
+        ];
 
-			// g^p
-			for j in 0..char-1{
-				g = function_multiple(&g, &g_temp);
-			}
+        for m in 0..(n / 2) {
+            let g_temp: Vec<PrimeField> = g.clone();
 
-			// g = g^p mod f
-			g = function_div(g, f.clone()).1;
+            // g^p
+            for j in 0..char - 1 {
+                g = function_multiple(&g, &g_temp);
+            }
+            // println!("g^p = {:?}", g);
 
-			//let mut g = pow_e_mod_f(g.clone(), f.clone(), char as u32, char);
+            // g = g^p mod f
+            g = function_div(g, f.clone()).1;
 
+            // println!("g^p mod f = {:?}", g);
+            //let mut g = pow_e_mod_f(g.clone(), f.clone(), char as u32, char);
 
+            let mut g_2 = g.clone();
+            // g^p-1 mod f
+            if g_2.len() == 0 {
+                g_2.push(PrimeField::new(char as u16, 0));
+                g_2.push(PrimeField::new(char as u16, (char - 1).into()));
+            } else if g_2.len() == 1 {
+                g_2.push(PrimeField::new(char as u16, (char - 1).into()));
+            } else {
+                g_2[1] = g_2[1].sub(&PrimeField::new(char, 1));
+            }
+            g_2 = adjust_function(g_2);
+            // println!("g^p-1 mod f = {:?}", g_2);
+            let mut h = gcd(f.clone(), g_2);
 
-			let mut g_2 = g.clone();
-			// g^p-1 mod f
-			if g_2.len() == 0{
-				g_2.push(PrimeField::new(char as u16, 0));
-				g_2.push(PrimeField::new(char as u16, (char-1).into()));
-			}
-			else if g_2.len() == 1{
-				g_2.push(PrimeField::new(char as u16, (char-1).into()));
-			}
-			else{
-				g_2[1] = g_2[1].sub(&PrimeField::new(char, 1));
-			}
-			g_2 = adjust_function(g_2);
-			let mut h = gcd(f.clone(),g_2);
-			
-			h = adjust_function(h);
-			println!("h = {:?}", h);
-			if !(h.len() <= 1 && h[0].num == 1) {
-				end_flag = false;
-				break;
-			}
+            h = adjust_function(h);
+            println!("h = {:?}", h);
+            if !(h.len() <= 1 && h[0].num == 1) {
+                end_flag = false;
+                break;
+            }
+        }
 
-
-			
-		}
-
-		if end_flag == true{
-				println!("answer = {:?}", f);
-			break;
-			
-			
-		}
-		
-	}
-
+        if end_flag == true {
+            println!("answer = {:?}", f);
+            break;
+        }
+    }
 }
