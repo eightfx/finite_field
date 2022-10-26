@@ -6,11 +6,13 @@ type NumType = i32;
 #[derive(Debug, Clone)]
 enum Element {
     PrimeField{element:NumType},
-	Polynomial{element:Vec<NumType>},
 	GaloisField {
         element: Vec<NumType>,
         primitive_polynomial: Vec<NumType>,
     },
+	PrimePolynomial{element:Vec<NumType>},
+	GaloisPolynomial{element:Vec<NumType>},
+
 }
 
 #[derive(Debug, Clone)]
@@ -422,6 +424,7 @@ impl ops::Mul for FiniteField {
 				if let Element::Polynomial{element:func_vec} = &other.element {
 					g = func_vec.clone();
 				}
+				println!("f: {:?}", f);
 				let mut result = vec![prime0; f.len() + g.len() - 1];
 				for i in 0..f.len(){
 					for j in 0..g.len(){
@@ -458,8 +461,32 @@ impl ops::Mul for FiniteField {
 				}
 
 	}
-			_ => {
-				panic!("not implemented");
+			Element::GaloisField { element:_, primitive_polynomial:_}=>{
+				let mut f: Vec<NumType> = Vec::new();
+				let mut g: Vec<NumType> = Vec::new();
+				let mut primitive_polynomial: Vec<NumType> = Vec::new();
+
+				let element0:Element = Element::PrimeField{element:0};
+				let prime0: FiniteField = FiniteField {
+					char: self.char,
+					element: element0,
+				};
+				// get element from enum
+				if let Element::GaloisField{element:func_vec, primitive_polynomial:pp} = &self.element {
+					f = func_vec.clone();
+					primitive_polynomial = pp.clone();
+				}
+				if let Element::GaloisField{element:func_vec, primitive_polynomial:pp} = &other.element {
+					g = func_vec.clone();
+					primitive_polynomial = pp.clone();
+				}
+				let polynomial_f = FiniteField{char:self.char, element:Element::Polynomial{element:f}};
+				let polynomial_g = FiniteField{char:self.char, element:Element::Polynomial{element:g}};
+				let mut result = polynomial_f * polynomial_g;
+
+				result
+
+				
 			}
 		}
 	}
@@ -498,11 +525,11 @@ fn main() {
 	// let element1:Element = Element::PrimeField{element:1};
 	// let element2:Element = Element::PrimeField{element:2};
 
-	let element1: Element = Element::Polynomial{element:vec![1, 2, 4]};
-	let element2: Element = Element::Polynomial{element:vec![1,2]};
+	// let element1: Element = Element::Polynomial{element:vec![1, 2, 4]};
+	// let element2: Element = Element::Polynomial{element:vec![1,2]};
 
-	// let element1:Element = Element::GaloisField{element:vec![4,2,3,4,3],primitive_polynomial:vec![2,2,3]};
-	// let element2:Element = Element::GaloisField{element:vec![1,2,3,1],primitive_polynomial:vec![2,2,3]};
+	let element1:Element = Element::GaloisField{element:vec![1,0,1],primitive_polynomial:vec![2,2,3]};
+	let element2:Element = Element::GaloisField{element:vec![0,1],primitive_polynomial:vec![2,2,3]};
 
 	let x: FiniteField = FiniteField {
 		char: char,
