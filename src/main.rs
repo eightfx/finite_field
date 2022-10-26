@@ -607,14 +607,16 @@ impl ops::Div for FiniteField {
 				if f_inv.len() >= g_inv.len() {
 					for i in 0..f_inv.len() - g_inv.len() + 1 {
 						let mut temp = f_inv[i].clone() / g_inv[0].clone();
-						println!("temp: {:?}", temp);
 						for j in 0..g_inv.len() {
 							f_inv[i + j] = f_inv[i + j].clone() - (g_inv[j].clone()*temp.clone());
 						}
 						quotient_inv.push(temp);
 					}
 				} else {
-					quotient_inv = f_inv;
+					quotient_inv = vec![FiniteField {
+						char: self.char,
+						element: Element::PrimeField{element:0},
+					}];
 				}
 
 				// reverse
@@ -655,6 +657,98 @@ fn drop0(vec: Vec<NumType>) -> Vec<NumType> {
 	vec
 }
 
+impl ops::Rem for FiniteField {
+    type Output = FiniteField;
+    // ユークリッドの互除法
+    fn rem(self, other: FiniteField) -> FiniteField {
+		match self.element{
+			Element::PrimeField{ element :_} =>{
+				panic!("PrimeField do not correspond to remainders");
+			}
+			Element::PrimePolynomial { element :_}=>{
+				let mut f: Vec<NumType> = Vec::new();
+				let mut g: Vec<NumType> = Vec::new();
+				let mut quotient_inv: Vec<FiniteField> = Vec::new();
+
+				// get element from enum
+				if let Element::PrimePolynomial{element:func_vec} = &self.element {
+					f = func_vec.clone();
+				}
+				if let Element::PrimePolynomial{element:func_vec} = &other.element {
+					g = func_vec.clone();
+				}
+				// drop0
+				f = drop0(f);
+				g = drop0(g);
+				
+				// NumType -> FiniteField
+				let mut f_prime:Vec<FiniteField> = Vec::new();
+				let mut g_prime:Vec<FiniteField> = Vec::new();
+				for i in 0..f.len(){
+					f_prime.push(FiniteField {
+						char: self.char,
+						element: Element::PrimeField{element:f[i]},
+					});
+				}
+				for i in 0..g.len(){
+					g_prime.push(FiniteField {
+						char: self.char,
+						element: Element::PrimeField{element:g[i]},
+					});
+				}
+
+				// reverse vec
+				let mut f_inv = f_prime.clone();
+				f_inv.reverse();
+				
+				let mut g_inv = g_prime.clone();
+				g_inv.reverse();
+
+				// div
+				if f_inv.len() >= g_inv.len() {
+					for i in 0..f_inv.len() - g_inv.len() + 1 {
+						let mut temp = f_inv[i].clone() / g_inv[0].clone();
+						for j in 0..g_inv.len() {
+							f_inv[i + j] = f_inv[i + j].clone() - (g_inv[j].clone()*temp.clone());
+						}
+					}
+				} 
+			    let mut remainder: Vec<FiniteField>;
+				if f_inv.len() == 0 {
+					remainder = vec![FiniteField {
+						char: self.char,
+						element: Element::PrimeField{element:0},
+					}];
+				} else {
+					remainder = f_inv.into_iter().rev().collect::<Vec<FiniteField>>();
+				}
+
+				// PrimeField to NumType
+				let mut remainder_vec: Vec<NumType> = Vec::new();
+				for i in 0..remainder.len() {
+					if let Element::PrimeField{element:a} = remainder[i].element {
+						remainder_vec.push(a);
+					}
+				}
+
+				remainder_vec = drop0(remainder_vec);
+
+				FiniteField {
+					char: self.char,
+					element: Element::PrimePolynomial{element:remainder_vec},
+				}
+
+				
+			}
+			_ => {
+				panic!("not implemented");
+			}
+
+		}
+	}
+}
+
+
 fn get_maxmin_degree(f: &Vec<NumType>, g: &Vec<NumType>) -> (usize, usize) {
 	let mut max_degree = 0;
 	let mut min_degree = 0;
@@ -668,30 +762,30 @@ fn get_maxmin_degree(f: &Vec<NumType>, g: &Vec<NumType>) -> (usize, usize) {
 	(max_degree, min_degree)
 }
 fn extended_euclidean( u: NumType, v: NumType) -> NumType{
-    let mut r0 = u;
-    let mut r1 = v;
-    let mut s0 = 1;
-    let mut s1 = 0;
-    let mut t0 = 0;
-    let mut t1 = 1;
-    while r1 != 0 {
-        let q = r0 / r1;
-        let r = r0 - q * r1;
-        let s = s0 - q * s1;
-        let t = t0 - q * t1;
-        r0 = r1;
-        s0 = s1;
-        t0 = t1;
-        r1 = r;
-        s1 = s;
-        t1 = t;
-    }
-    if t0 < 0 {
-        t0 + u
-    } else {
-        t0
-    }
-    }
+	let mut r0 = u;
+	let mut r1 = v;
+	let mut s0 = 1;
+	let mut s1 = 0;
+	let mut t0 = 0;
+	let mut t1 = 1;
+	while r1 != 0 {
+		let q = r0 / r1;
+		let r = r0 - q * r1;
+		let s = s0 - q * s1;
+		let t = t0 - q * t1;
+		r0 = r1;
+		s0 = s1;
+		t0 = t1;
+		r1 = r;
+		s1 = s;
+		t1 = t;
+	}
+	if t0 < 0 {
+		t0 + u
+	} else {
+		t0
+	}
+}
 
 
 fn main() {
@@ -699,8 +793,8 @@ fn main() {
 	// let element1:Element = Element::PrimeField{element:3};
 	// let element2:Element = Element::PrimeField{element:2};
 
-	let element1: Element = Element::PrimePolynomial{element:vec![1, 2, 4]};
-	let element2: Element = Element::PrimePolynomial{element:vec![1,2]};
+	let element1: Element = Element::PrimePolynomial{element:vec![1, 2,2,4]};
+	let element2: Element = Element::PrimePolynomial{element:vec![1,2,3]};
 
 	// let element1:Element = Element::GaloisField{element:vec![1,0,1],primitive_polynomial:vec![2,2,3]};
 	// let element2:Element = Element::GaloisField{element:vec![0,1],primitive_polynomial:vec![2,2,3]};
