@@ -50,16 +50,16 @@ impl ops::Add for FiniteField {
                     element: Element::PrimeField{element:tmp},
                 }
             }
-            Element::Polynomial{element:_} => {
+            Element::PrimePolynomial{element:_} => {
                 let mut result: Vec<NumType> = Vec::new();
                 let mut f: Vec<NumType> = Vec::new();
                 let mut g: Vec<NumType> = Vec::new();
 
                 // get element from enum
-                if let Element::Polynomial{element:func_vec} = &self.element {
+                if let Element::PrimePolynomial{element:func_vec} = &self.element {
                     f = func_vec.clone();
                 }
-                if let Element::Polynomial{element:func_vec} = &other.element {
+                if let Element::PrimePolynomial{element:func_vec} = &other.element {
                     g = func_vec.clone();
                 }
 
@@ -107,7 +107,7 @@ impl ops::Add for FiniteField {
 
                 FiniteField {
                     char: self.char,
-                    element: Element::Polynomial{element:result},
+                    element: Element::PrimePolynomial{element:result},
                 }
             }
             Element::GaloisField {
@@ -187,8 +187,11 @@ impl ops::Add for FiniteField {
                     },
                 }
             }
-        }
-    }
+			_ => {
+				panic!("not implemented");
+			}
+		}
+	}
 }
 
 impl ops::Sub for FiniteField {
@@ -218,16 +221,16 @@ impl ops::Sub for FiniteField {
                     element: Element::PrimeField{element:tmp},
                 }
             }
-            Element::Polynomial{element:_} => {
+            Element::PrimePolynomial{element:_} => {
                 let mut result: Vec<NumType> = Vec::new();
                 let mut f: Vec<NumType> = Vec::new();
                 let mut g: Vec<NumType> = Vec::new();
 
                 // get element from enum
-                if let Element::Polynomial{element:func_vec} = &self.element {
+                if let Element::PrimePolynomial{element:func_vec} = &self.element {
                     f = func_vec.clone();
                 }
-                if let Element::Polynomial{element:func_vec} = &other.element {
+                if let Element::PrimePolynomial{element:func_vec} = &other.element {
                     g = func_vec.clone();
                 }
 
@@ -290,7 +293,7 @@ impl ops::Sub for FiniteField {
 
                 FiniteField {
                     char: self.char,
-                    element: Element::Polynomial{element:result},
+                    element: Element::PrimePolynomial{element:result},
                 }
             }
             Element::GaloisField {
@@ -384,6 +387,10 @@ impl ops::Sub for FiniteField {
                     },
                 }
             }
+			_ => {
+				panic!("not implemented");
+			}
+
         }
     }
 }
@@ -408,7 +415,7 @@ impl ops::Mul for FiniteField {
 				}
 			}
 
-			Element::Polynomial{element:_} => {
+			Element::PrimePolynomial{element:_} => {
 				let mut f: Vec<NumType> = Vec::new();
 				let mut g: Vec<NumType> = Vec::new();
 
@@ -418,13 +425,12 @@ impl ops::Mul for FiniteField {
 					element: element0,
 				};
 				// get element from enum
-				if let Element::Polynomial{element:func_vec} = &self.element {
+				if let Element::PrimePolynomial{element:func_vec} = &self.element {
 					f = func_vec.clone();
 				}
-				if let Element::Polynomial{element:func_vec} = &other.element {
+				if let Element::PrimePolynomial{element:func_vec} = &other.element {
 					g = func_vec.clone();
 				}
-				println!("f: {:?}", f);
 				let mut result = vec![prime0; f.len() + g.len() - 1];
 				for i in 0..f.len(){
 					for j in 0..g.len(){
@@ -457,7 +463,7 @@ impl ops::Mul for FiniteField {
 
 				FiniteField {
 					char: self.char,
-					element: Element::Polynomial{element:result},
+					element: Element::PrimePolynomial{element:result},
 				}
 
 	}
@@ -480,19 +486,161 @@ impl ops::Mul for FiniteField {
 					g = func_vec.clone();
 					primitive_polynomial = pp.clone();
 				}
-				let polynomial_f = FiniteField{char:self.char, element:Element::Polynomial{element:f}};
-				let polynomial_g = FiniteField{char:self.char, element:Element::Polynomial{element:g}};
-				let mut result = polynomial_f * polynomial_g;
+				let mut result = vec![prime0; f.len() + g.len() - 1];
+				for i in 0..f.len(){
+					for j in 0..g.len(){
+						let r_tmp = FiniteField {
+							char: self.char,
+							element: result[i+j].element.clone(),
+						};
+						let f_tmp = FiniteField {
+							char: self.char,
+							element: Element::PrimeField{element:f[i]},
+						};
+						let g_tmp = FiniteField {
+							char: self.char,
+							element: Element::PrimeField{element:g[j]},
+						};
 
-				result
+						result[i + j] = r_tmp + f_tmp * g_tmp;
+					}
+				}
+				// change to Vec<NumType>
+				let mut result_vec: Vec<NumType> = Vec::new();
+				for i in 0..result.len() {
+					if let Element::PrimeField{element:a} = result[i].element {
+						result_vec.push(a);
+					}
+				}
 
+				// drop0
+				let result = drop0(result_vec);
+
+				// mod primitive_polynomial
+
+				// TODO
+				
+				FiniteField {
+					char: self.char,
+					element: Element::GaloisField{element:result, primitive_polynomial:primitive_polynomial},
+				}
 				
 			}
+			_ => {
+				panic!("not implemented");
+			}
+
 		}
 	}
 }
 
+impl ops::Div for FiniteField {
+    type Output = FiniteField;
+    // ユークリッドの互除法
+    fn div(self, other: FiniteField) -> FiniteField {
+		match self.element{
+			Element::PrimeField { element:_}=>{
+			
+				let mut x: NumType = 0;
+				let mut y: NumType = 0;
+				if let Element::PrimeField{element:a} = self.element {
+					x = a;
+				}
+				if let Element::PrimeField{element:a} = other.element {
+					y = a;
+				}
+				let mut t = extended_euclidean(self.char as NumType, y);
 
+				if t < 0 {
+					let mut i = 1;
+
+					while (t + i * self.char as NumType) < 0 {
+						i += 1;
+					}
+					t = (t + i * self.char as NumType) % self.char as NumType;
+				}
+        FiniteField{
+            char: self.char,
+            element: Element::PrimeField{element:(x* t) % self.char as NumType}
+		}
+			}
+			Element::PrimePolynomial { element:_}=>{
+				let mut f: Vec<NumType> = Vec::new();
+				let mut g: Vec<NumType> = Vec::new();
+				let mut quotient_inv: Vec<FiniteField> = Vec::new();
+
+				// get element from enum
+				if let Element::PrimePolynomial{element:func_vec} = &self.element {
+					f = func_vec.clone();
+				}
+				if let Element::PrimePolynomial{element:func_vec} = &other.element {
+					g = func_vec.clone();
+				}
+				// drop0
+				f = drop0(f);
+				g = drop0(g);
+				
+				// NumType -> FiniteField
+				let mut f_prime:Vec<FiniteField> = Vec::new();
+				let mut g_prime:Vec<FiniteField> = Vec::new();
+				for i in 0..f.len(){
+					f_prime.push(FiniteField {
+						char: self.char,
+						element: Element::PrimeField{element:f[i]},
+					});
+				}
+				for i in 0..g.len(){
+					g_prime.push(FiniteField {
+						char: self.char,
+						element: Element::PrimeField{element:g[i]},
+					});
+				}
+
+				// reverse vec
+				let mut f_inv = f_prime.clone();
+				f_inv.reverse();
+				
+				let mut g_inv = g_prime.clone();
+				g_inv.reverse();
+
+				// div
+				if f_inv.len() >= g_inv.len() {
+					for i in 0..f_inv.len() - g_inv.len() + 1 {
+						let mut temp = f_inv[i].clone() / g_inv[0].clone();
+						println!("temp: {:?}", temp);
+						for j in 0..g_inv.len() {
+							f_inv[i + j] = f_inv[i + j].clone() - (g_inv[j].clone()*temp.clone());
+						}
+						quotient_inv.push(temp);
+					}
+				} else {
+					quotient_inv = f_inv;
+				}
+
+				// reverse
+				let mut quotient = quotient_inv.clone();
+				quotient.reverse();
+
+				// PrimeField to NumType
+				let mut quotient_vec: Vec<NumType> = Vec::new();
+				for i in 0..quotient.len() {
+					if let Element::PrimeField{element:a} = quotient[i].element {
+						quotient_vec.push(a);
+					}
+				}
+
+				FiniteField {
+					char: self.char,
+					element: Element::PrimePolynomial{element:quotient_vec},
+				}
+
+			}
+			_ => {
+				panic!("not implemented");
+			}
+		}
+	}
+}
 
 fn drop0(vec: Vec<NumType>) -> Vec<NumType> {
 	let mut vec_inverse = vec.into_iter().rev().collect::<Vec<NumType>>();
@@ -519,17 +667,43 @@ fn get_maxmin_degree(f: &Vec<NumType>, g: &Vec<NumType>) -> (usize, usize) {
 	}
 	(max_degree, min_degree)
 }
+fn extended_euclidean( u: NumType, v: NumType) -> NumType{
+    let mut r0 = u;
+    let mut r1 = v;
+    let mut s0 = 1;
+    let mut s1 = 0;
+    let mut t0 = 0;
+    let mut t1 = 1;
+    while r1 != 0 {
+        let q = r0 / r1;
+        let r = r0 - q * r1;
+        let s = s0 - q * s1;
+        let t = t0 - q * t1;
+        r0 = r1;
+        s0 = s1;
+        t0 = t1;
+        r1 = r;
+        s1 = s;
+        t1 = t;
+    }
+    if t0 < 0 {
+        t0 + u
+    } else {
+        t0
+    }
+    }
+
 
 fn main() {
 	let char: u32 = 5;
-	// let element1:Element = Element::PrimeField{element:1};
+	// let element1:Element = Element::PrimeField{element:3};
 	// let element2:Element = Element::PrimeField{element:2};
 
-	// let element1: Element = Element::Polynomial{element:vec![1, 2, 4]};
-	// let element2: Element = Element::Polynomial{element:vec![1,2]};
+	let element1: Element = Element::PrimePolynomial{element:vec![1, 2, 4]};
+	let element2: Element = Element::PrimePolynomial{element:vec![1,2]};
 
-	let element1:Element = Element::GaloisField{element:vec![1,0,1],primitive_polynomial:vec![2,2,3]};
-	let element2:Element = Element::GaloisField{element:vec![0,1],primitive_polynomial:vec![2,2,3]};
+	// let element1:Element = Element::GaloisField{element:vec![1,0,1],primitive_polynomial:vec![2,2,3]};
+	// let element2:Element = Element::GaloisField{element:vec![0,1],primitive_polynomial:vec![2,2,3]};
 
 	let x: FiniteField = FiniteField {
 		char: char,
@@ -539,5 +713,5 @@ fn main() {
 		char: char,
 		element: element2,
 	};
-	println!("{:?}", (y * x).element);
+	println!("{:?}", (x / y).element);
 }
