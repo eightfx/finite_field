@@ -2,6 +2,7 @@ use std::ops;
 // type of number , ex: i32
 type NumType = i32;
 
+
 #[derive(Debug, Clone)]
 enum Element {
     PrimeField {
@@ -27,21 +28,21 @@ struct FiniteField {
 impl FiniteField{
 	fn get_0(&self) -> FiniteField{
 		match &self.element{
-			Element::PrimeField{element} => FiniteField{char: self.char, element: Element::PrimeField{element: 0}},
-			Element::GaloisField{element, primitive_polynomial} => FiniteField{char: self.char, element: Element::GaloisField{element: vec![0], primitive_polynomial: primitive_polynomial.clone()}},
+			Element::PrimeField{element:_} => FiniteField{char: self.char, element: Element::PrimeField{element: 0}},
+			Element::GaloisField{element:_, primitive_polynomial:pp} => FiniteField{char: self.char, element: Element::GaloisField{element: vec![0], primitive_polynomial: pp.clone()}},
 		}
 	}
 	fn get_1(&self) -> FiniteField{
 		match &self.element{
-			Element::PrimeField{element} => FiniteField{char: self.char, element: Element::PrimeField{element: 1}},
-			Element::GaloisField{element, primitive_polynomial} => FiniteField{char: self.char, element: Element::GaloisField{element: vec![1], primitive_polynomial: primitive_polynomial.clone()}},
+			Element::PrimeField{element:_} => FiniteField{char: self.char, element: Element::PrimeField{element: 1}},
+			Element::GaloisField{element:_, primitive_polynomial:pp} => FiniteField{char: self.char, element: Element::GaloisField{element: vec![1], primitive_polynomial:pp.clone()}},
 		}
 	}
 
 	fn is_0(&self) -> bool{
 		match &self.element{
-			Element::PrimeField{element} => *element == 0,
-			Element::GaloisField{element, primitive_polynomial} => (element[0] == 0)&&(element.len() == 1),
+			Element::PrimeField{element:e} => *e == 0,
+			Element::GaloisField{element:e, primitive_polynomial:_} => (e[0] == 0)&&(e.len() == 1),
 		}
 	}
 
@@ -167,7 +168,7 @@ impl ops::Div for Polynomial {
 		}
 	else{
 		for i in 0..f_inv.len()-g_inv.len()+1{
-			let mut temp = f_inv[i].clone() / g_inv[0].clone();
+			let temp = f_inv[i].clone() / g_inv[0].clone();
 			for j in 0..g_inv.len(){
 				f_inv[i+j] = f_inv[i+j].clone() - (temp.clone() * g_inv[j].clone());
 			}
@@ -186,6 +187,77 @@ impl ops::Div for Polynomial {
 	}
 }
 
+
+impl ops::Rem for Polynomial {
+    type Output = Polynomial;
+    fn rem(self, other: Polynomial) -> Polynomial {
+		let mut quotient = Polynomial {
+			char: self.char,
+			coef: Vec::new(),
+		};
+		let mut f_inv = self.coef.clone();
+		f_inv.reverse();
+		let mut g_inv = other.coef.clone();
+		g_inv.reverse();
+
+		// drop0
+		for i in 0..f_inv.len(){
+			if f_inv[i].is_0(){
+				f_inv.remove(0);
+			}else{
+				break;
+			}
+		}
+		for i in 0..g_inv.len(){
+			if g_inv[i].is_0(){
+				g_inv.remove(0);
+			}else{
+				break;
+			}
+		}
+
+		if f_inv.len() < g_inv.len(){
+			quotient = Polynomial{
+				char: self.char,
+				coef: vec![self.coef[0].clone().get_0()],
+			};
+		}
+		else{
+			for i in 0..f_inv.len()-g_inv.len()+1{
+				let temp = f_inv[i].clone() / g_inv[0].clone();
+				for j in 0..g_inv.len(){
+					f_inv[i+j] = f_inv[i+j].clone() - (temp.clone() * g_inv[j].clone());
+				}
+				quotient.coef.push(temp);
+			}
+			
+		}
+
+		// drop0
+		for _ in 0..f_inv.len(){
+			if f_inv[0].is_0(){
+				f_inv.remove(0);
+			}else{
+				break;
+			}
+		}
+		let remainder: Polynomial;
+		
+		if f_inv.len() == 0 {
+			remainder = Polynomial{
+				char: self.char,
+				coef: vec![self.coef[0].clone().get_0()],
+			};
+		} else {
+			remainder = Polynomial{
+				char: self.char,
+				coef: f_inv.clone().into_iter().rev().collect(),
+			};
+		}
+		remainder
+
+	}
+}
 
 // prime fields
 impl ops::Add for FiniteField {
@@ -663,7 +735,7 @@ impl ops::Neg for FiniteField {
 			} => {
 				let mut primitive_polynomial: Vec<FiniteField> = vec![];
 				if let Element::GaloisField {
-					element: func_vec,
+					element: _,
 					primitive_polynomial: pp,
 				} = &self.element
 				{
@@ -729,40 +801,40 @@ fn main() {
 	let element2: Element = Element::PrimeField { element: 1 };
 	let element3: Element = Element::PrimeField { element: 1 };
 
-	// let primitive_polynomial = vec![
-	// 	FiniteField {
-	// 		char: char,
-	// 		element: Element::PrimeField { element: 1 },
-	// 	},
-	// 	FiniteField {
-	// 		char: char,
-	// 		element: Element::PrimeField { element: 1 },
-	// 	},
-	// 	FiniteField {
-	// 		char: char,
-	// 		element: Element::PrimeField { element: 0 },
-	// 	},
-	// 	FiniteField {
-	// 		char: char,
-	// 		element: Element::PrimeField { element: 0 },
-	// 	},
-	// 	FiniteField {
-	// 		char: char,
-	// 		element: Element::PrimeField { element: 1 },
-	// 	},
-	// ];
-	// let element1: Element = Element::GaloisField {
-	// 	element: vec![1, 0, 0, 1],
-	// 	primitive_polynomial: primitive_polynomial.clone(),
-	// };
-	// let element2: Element = Element::GaloisField {
-	// 	element: vec![0, 1, 0, 1],
-	// 	primitive_polynomial: primitive_polynomial.clone(),
-	// };
-	// let element3: Element = Element::GaloisField {
-	// 	element: vec![1, 1, 0, 1],
-	// 	primitive_polynomial: primitive_polynomial.clone(),
-	// };
+	let primitive_polynomial = vec![
+		FiniteField {
+			char: char,
+			element: Element::PrimeField { element: 1 },
+		},
+		FiniteField {
+			char: char,
+			element: Element::PrimeField { element: 1 },
+		},
+		FiniteField {
+			char: char,
+			element: Element::PrimeField { element: 0 },
+		},
+		FiniteField {
+			char: char,
+			element: Element::PrimeField { element: 0 },
+		},
+		FiniteField {
+			char: char,
+			element: Element::PrimeField { element: 1 },
+		},
+	];
+	let element1: Element = Element::GaloisField {
+		element: vec![1, 0, 0, 1],
+		primitive_polynomial: primitive_polynomial.clone(),
+	};
+	let element2: Element = Element::GaloisField {
+		element: vec![0, 1, 0, 1],
+		primitive_polynomial: primitive_polynomial.clone(),
+	};
+	let element3: Element = Element::GaloisField {
+		element: vec![1, 1, 0, 1],
+		primitive_polynomial: primitive_polynomial.clone(),
+	};
 
 	let element1: FiniteField = FiniteField {
 		char: char,
@@ -786,5 +858,5 @@ fn main() {
 	};
 
 		// println!("{:?}", (element2*element1).element);
-	println!("{:?}", (poly1/poly2).coef);
+	println!("{:?}", (poly1%poly2).coef);
 }
