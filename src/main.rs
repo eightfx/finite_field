@@ -15,7 +15,6 @@ enum Element {
 struct Polynomial{
 	char: u32,
 	coef: Vec<FiniteField>,
-	prmitive_polynomial: Vec<FiniteField>
 }
 
 #[derive(Debug, Clone)]
@@ -198,7 +197,7 @@ impl ops::Sub for FiniteField {
 				}
 
 				// get each degree
-				let (mut max_degree, mut min_degree) = get_maxmin_degree(&f, &g);
+				let (max_degree, min_degree) = get_maxmin_degree(&f, &g);
 
 				// calculate
 				for i in 0..min_degree {
@@ -261,10 +260,6 @@ impl ops::Sub for FiniteField {
 					},
 				}
 			}
-			_ => {
-				panic!("not implemented");
-			}
-
 		}
 	}
 }
@@ -334,14 +329,14 @@ impl ops::Mul for FiniteField {
 
 				if result_inv.len() >= primitive_polynomial_inv.len(){
 					for i in 0..result_inv.len()-primitive_polynomial_inv.len() + 1{
-						let mut temp = result_inv[i].clone() / primitive_polynomial_inv[0].clone();
+						let temp = result_inv[i].clone() / primitive_polynomial_inv[0].clone();
 						for j in 0..primitive_polynomial_inv.len(){
 							result_inv[i+j] = result_inv[i+j].clone() - (temp.clone() * primitive_polynomial_inv[j].clone());
 						}
 					}
 				}
 				// drop0
-				for i in 0..result_inv.len(){
+				for _ in 0..result_inv.len(){
 					if let Element::PrimeField{element:a} = result_inv[0].element {
 						if a != 0 {
 							break;
@@ -402,10 +397,48 @@ impl ops::Div for FiniteField {
 					element: Element::PrimeField{element:(x* t) % self.char as NumType}
 				}
 			}
-			_=>{
-				panic!("not implemented");
-			}
+			Element::GaloisField { element:_, primitive_polynomial :_}=>{
+				let mut f: FiniteField = FiniteField {
+					char: self.char,
+					element: Element::PrimeField{element:0}};
+				
+				let mut g: FiniteField = FiniteField {
+					char: self.char,
+					element: Element::PrimeField{element:0}};
 
+				let element0:Element = Element::PrimeField{element:0};
+				let mut primitive_polynomial: Vec<FiniteField> = vec![FiniteField {
+					char: self.char,
+					element: element0.clone(),
+				}];
+
+				// get element from enum
+					if let Element::GaloisField{element:func_vec, primitive_polynomial:pp} = &self.element {
+						f = FiniteField{
+							char: self.char,
+							element: Element::GaloisField{element:func_vec.clone(), primitive_polynomial:pp.clone()},
+						};
+						primitive_polynomial = pp.clone();
+					}
+				if let Element::GaloisField{element:func_vec, primitive_polynomial:pp} = &other.element {
+					g = FiniteField{
+						char: self.char,
+						element: Element::GaloisField{element:func_vec.clone(), primitive_polynomial:pp.clone()},
+					};
+				}
+
+				// g^(-1) = g^(q-2) mod primitive_polynomial
+				let pow_count= self.char.pow((primitive_polynomial.len()-1).try_into().unwrap()) - 2;
+				let g_origin = g.clone();
+				for _ in 0..pow_count-1{
+					g = g * g_origin.clone();
+				}
+
+				// f * g^(-1) mod primitive_polynomial
+				let result:FiniteField = f*g;
+
+				result
+			}
 
 		}
 	}
@@ -413,7 +446,7 @@ impl ops::Div for FiniteField {
 
 fn drop0(vec: Vec<NumType>) -> Vec<NumType> {
 	let mut vec_inverse = vec.into_iter().rev().collect::<Vec<NumType>>();
-	for i in 0..vec_inverse.len() - 1 {
+	for _ in 0..vec_inverse.len() - 1 {
 		if vec_inverse[0] != 0 {
 			break;
 		} else {
@@ -424,26 +457,10 @@ fn drop0(vec: Vec<NumType>) -> Vec<NumType> {
 	vec
 }
 
-impl ops::Rem for FiniteField {
-	type Output = FiniteField;
-	// ユークリッドの互除法
-	fn rem(self, other: FiniteField) -> FiniteField {
-		match self.element{
-			Element::PrimeField{ element :_} =>{
-				panic!("PrimeField do not correspond to remainders");
-			}
-			Element::GaloisField{ element :_, primitive_polynomial:_} =>{
-				panic!("GaloisField do not correspond to remainders");
-			}
-
-		}
-	}
-}
-
 
 fn get_maxmin_degree(f: &Vec<NumType>, g: &Vec<NumType>) -> (usize, usize) {
-	let mut max_degree = 0;
-	let mut min_degree = 0;
+	let max_degree:usize;
+	let min_degree:usize;
 	if f.len() < g.len() {
 		max_degree = g.len();
 		min_degree = f.len();
@@ -490,7 +507,7 @@ fn main() {
 
 
 	let primitive_polynomial = vec![FiniteField{char:char,element:Element::PrimeField{element:1}},FiniteField{char:char,element:Element::PrimeField{element:1}},FiniteField{char:char,element:Element::PrimeField{element:0}},FiniteField{char:char,element:Element::PrimeField{element:0}},FiniteField{char:char,element:Element::PrimeField{element:1}}];
-	let element1:Element = Element::GaloisField{element:vec![1,1,0,0],primitive_polynomial:primitive_polynomial.clone()};
+	let element1:Element = Element::GaloisField{element:vec![1,0,0,1],primitive_polynomial:primitive_polynomial.clone()};
 	let element2:Element = Element::GaloisField{element:vec![0,1,0,1],primitive_polynomial:primitive_polynomial.clone()};
 
 	let x: FiniteField = FiniteField {
@@ -501,5 +518,5 @@ fn main() {
 		char: char,
 		element: element2,
 	};
-	println!("{:?}", (x * y).element);
+	println!("{:?}", (x / y).element);
 }
