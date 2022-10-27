@@ -21,83 +21,89 @@ A Rust library for operations on finite field, featuring:
 Add this to your Cargo.toml:
 #+begin_src
 [dependencies]
-finite_fields = "0.1.0"
+finite_fields = "0.1.2"
 #+end_src
 
 * Examples
 ** Prime Field
 #+begin_src rust
-use finite_field::*;
+use galois_field::*;
 
-// consider F_5
-let char:u32 = 5
-let x:FiniteField = FiniteField{
-    char:char,
-    element:Element::PrimeField(2)
-    };
-let y:FiniteField = FiniteField{
-    char:char,
-    element:Element::PrimeField(3)
-    };
-println!("x + y = {:?}", x + y);
-println!("x - y = {:?}", x - y);
-println!("x * y = {:?}", x * y);
-println!("x / y = {:?}", x / y);
+fn main() {
+	let char: u32 = 2;
+	let n = 4;
+	
+	let primitive_polynomial = Polynomial::get_primitive_polynomial(char, n);
+	let x:FiniteField = FiniteField{
+		char: char,
+		element:Element::GaloisField{element:vec![0,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,1] = x -> 2 over GF(2^4)
+	};
+	let y:FiniteField = FiniteField{
+		char: char,
+		element:Element::GaloisField{element:vec![0,0,1,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,0,1,1] = x^3 + x^2 -> 12 over GF(2^4)
+	};
+	
+	println!("x + y = {:?}", (x.clone() + y.clone()).element);
+	println!("x - y = {:?}", (x.clone() - y.clone()).element);
+	println!("x * y = {:?}", (x.clone() * y.clone()).element);
+	println!("x / y = {:?}", (x.clone() / y.clone()).element);
+}
 #+end_src
 ** Galois Field
 #+begin_src rust
-use finite_field::*;
+use galois_field::*;
 
-// consider GF(5^3)
-let char:u32 = 5
-let n:u32 = 3
-let primitive_polynomial = Polynomial::get_primitive_polynomial(char, n);
-let element1:Element = Element::GaloisField{element:vec![4,2,3,4,3],primitive_polynomial:primitive_polynomial.clone()};
-let element2:Element = Element::GaloisField{element:vec![1,2,3,1],primitive_polynomial:primitive_polynomial.clone()};
+fn main(){
+	// consider GF(2^4)
+	let char: u32 = 2;
+	let n = 4;
+	let primitive_polynomial = Polynomial::get_primitive_polynomial(char, n);
+	let x:FiniteField = FiniteField{
+ 		char: char,
+ 		element:Element::GaloisField{element:vec![0,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,1] = x -> 2 over GF(2^4)
+	};
+	let y:FiniteField = FiniteField{
+ 		char: char,
+ 		element:Element::GaloisField{element:vec![0,0,1,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,0,1,1] = x^3 + x^2 -> 12 over GF(2^4)
+	};
+	println!("x + y = {:?}", (x.clone() + y.clone()).element);
+	println!("x - y = {:?}", (x.clone() - y.clone()).element);
+	println!("x * y = {:?}", (x.clone() * y.clone()).element);
+	println!("x / y = {:?}", (x.clone() / y.clone()).element);
 
-let x: FiniteField = FiniteField {
-    char: char,
-    element: element1,
-};
-let y: FiniteField = FiniteField {
-    char: char,
-    element: element2,
-};
-    println!("x + y = {:?}", (x + y).element);
-    println!("x - y = {:?}", (x - y).element);
-    println!("x * y = {:?}", (x * y).element);
-    println!("x / y = {:?}", (x / y).element);
-
+}
 #+end_src
 ** Polynomial over F_p
 #+begin_src rust
-use finite_field::*;
+use galois_field::*;
 
-let char:u32 = 2;
+fn main() {
+	// character
+    let char: u32 = 2;
 
-let element0 = FiniteField {
-    char: char,
-    element: Element::PrimeField { element: 0 },
-};
-let element1 = FiniteField {
-    char: char,
-    element: Element::PrimeField { element: 1 },
-};
+	let element0:FiniteField = FiniteField{
+		char: char,
+		element:Element::PrimeField{element:0} // 0 in F_5
+	};
+	let element1:FiniteField = FiniteField{
+		char: char,
+		element:Element::PrimeField{element:1} // 1 in F_5
+	};
 
-let f1: Polynomial = Polynomial {
-    char: char,
-    coef: vec![element0.clone(), element1.clone()], // 0 + 1*x = x
-};
-let f2: Polynomial = Polynomial {
-    char: char,
-    coef: vec![element0.clone(), element1.clone(), element1.clone()], // 0 + 1*x + 1*x^2 = x + x^2
-};
-println!("f1 + f2 = {:?}", (f1 + f2).coef);
-println!("f1 - f2 = {:?}", (f1 - f2).coef);
-println!("f1 * f2 = {:?}", (f1 * f2).coef);
-println!("f1 / f2 = {:?}", (f1 / f2).coef);
-println!("f1 % f2 = {:?}", (f1 % f2).coef);
 
+	let f: Polynomial = Polynomial {
+        coef: vec![element1.clone(),element0.clone(),element0.clone(),element0.clone(),element1.clone()]
+	};
+    let g: Polynomial = Polynomial {
+		coef: vec![element1.clone(),element0.clone(),element0.clone(),element1.clone(),element1.clone()]
+    };
+    println!("f + g = {:?}", (f.clone()+g.clone()).coef);
+	println!("f - g = {:?}", (f.clone()-g.clone()).coef);
+	println!("f * g = {:?}", (f.clone()*g.clone()).coef);
+	println!("f / g = {:?}", (f.clone()/g.clone()).coef);
+	println!("f % g = {:?}", (f.clone()%g.clone()).coef);
+	
+}
 #+end_src
 ** Polynomial over GF(p^n)
 Same as above
