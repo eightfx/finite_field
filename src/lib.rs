@@ -34,7 +34,7 @@
 //! // consider GF(2^4)
 //! let char = 2;
 //! let n = 4;
-//! let primitive_polynomial = get_primitive_polynomial(char,n);
+//! let primitive_polynomial = Polynomial::get_primitive_polynomial(char,n);
 //! let x:FiniteField = FiniteField {
 //!     char: self.char,
 //!     element: Element::PrimeField { element: vec![0,1] }, // i.e. [0,1] = x -> 2 over GF(2^4)
@@ -117,6 +117,99 @@ pub struct FiniteField {
     pub element: Element,
 }
 impl Polynomial {
+	pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
+		// get primitive polynomial of GF(q^n)
+		// examples: when char = 2, n = 2, return x^2 + x + 1
+		//                  when char = 2, n = 4, return x^4 + x + 1
+
+		let mut answer: Polynomial = Polynomial { coef: Vec::new() };
+
+		for i in 0..(char.pow(n as u32)) {
+			// f :nth order monic polynomial on F_p
+			let mut f_vec: Vec<NumType> = change_base_from10_to_n(i as NumType, char as NumType);
+			for _ in 0..(n as usize) - f_vec.len() + 1 {
+				f_vec.push(0);
+			}
+			f_vec.pop();
+			f_vec.push(1);
+
+			// Vec<NumType> -> Vec<FiniteField>
+			let mut f_vec_ff: Vec<FiniteField> = Vec::new();
+			for j in 0..f_vec.len() {
+				f_vec_ff.push(FiniteField {
+					char: char,
+					element: Element::PrimeField { element: f_vec[j] },
+				});
+			}
+
+			let f: Polynomial = Polynomial { coef: f_vec_ff };
+
+			let mut end_flag: bool = true;
+
+			// g = x
+			let g_vec: Vec<FiniteField> = vec![
+				FiniteField {
+					char: char,
+					element: Element::PrimeField { element: 0 },
+				},
+				FiniteField {
+					char: char,
+					element: Element::PrimeField { element: 1 },
+				},
+			];
+			let mut g: Polynomial = Polynomial { coef: g_vec };
+
+			for _ in 0..(n / 2) {
+				let g_temp: Polynomial = g.clone();
+
+				// g^p
+				for _ in 0..char - 1 {
+					g = g * g_temp.clone();
+				}
+
+				// g = g^p mod f
+				g = g % f.clone();
+
+				let mut g_2 = g.clone();
+				// g^p-1 mod f
+				if g_2.coef.len() == 0 {
+					g_2.coef.push(FiniteField {
+						char: char,
+						element: Element::PrimeField { element: 0 },
+					});
+					g_2.coef.push(FiniteField {
+						char: char,
+						element: Element::PrimeField {
+							element: (char - 1) as NumType,
+						},
+					});
+				} else if g_2.coef.len() == 1 {
+					g_2.coef.push(FiniteField {
+						char: char,
+						element: Element::PrimeField {
+							element: (char - 1) as NumType,
+						},
+					});
+				} else {
+					g_2.coef[1] = g_2.coef[1].clone() - g_2.coef[0].get_1();
+				}
+				g_2 = g_2.adjust_func();
+
+				let h = Polynomial::gcd(&f, g_2);
+				if !(h.coef.len() <= 1 && h.coef[0].is_1()) {
+					end_flag = false;
+					break;
+				}
+			}
+
+			if end_flag == true {
+				answer = f;
+				break;
+			}
+		}
+		answer
+	}
+
     pub fn assign_value(&mut self, value: FiniteField) -> FiniteField {
         // assign value to polynomial
         // example: f.coef = [0,1,2] i.e. f(x) = 2x^2 + x + 0, then
@@ -988,106 +1081,12 @@ fn change_base_from10_to_n(x: NumType, n: NumType) -> Vec<NumType> {
     result
 }
 
-pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
-    // get primitive polynomial of GF(q^n)
-    // examples: when char = 2, n = 2, return x^2 + x + 1
-    //                  when char = 2, n = 4, return x^4 + x + 1
-
-    let mut answer: Polynomial = Polynomial { coef: Vec::new() };
-
-    for i in 0..(char.pow(n as u32)) {
-        // f :nth order monic polynomial on F_p
-        let mut f_vec: Vec<NumType> = change_base_from10_to_n(i as NumType, char as NumType);
-        for _ in 0..(n as usize) - f_vec.len() + 1 {
-            f_vec.push(0);
-        }
-        f_vec.pop();
-        f_vec.push(1);
-
-        // Vec<NumType> -> Vec<FiniteField>
-        let mut f_vec_ff: Vec<FiniteField> = Vec::new();
-        for j in 0..f_vec.len() {
-            f_vec_ff.push(FiniteField {
-                char: char,
-                element: Element::PrimeField { element: f_vec[j] },
-            });
-        }
-
-        let f: Polynomial = Polynomial { coef: f_vec_ff };
-
-        let mut end_flag: bool = true;
-
-        // g = x
-        let g_vec: Vec<FiniteField> = vec![
-            FiniteField {
-                char: char,
-                element: Element::PrimeField { element: 0 },
-            },
-            FiniteField {
-                char: char,
-                element: Element::PrimeField { element: 1 },
-            },
-        ];
-        let mut g: Polynomial = Polynomial { coef: g_vec };
-
-        for _ in 0..(n / 2) {
-            let g_temp: Polynomial = g.clone();
-
-            // g^p
-            for _ in 0..char - 1 {
-                g = g * g_temp.clone();
-            }
-
-            // g = g^p mod f
-            g = g % f.clone();
-
-            let mut g_2 = g.clone();
-            // g^p-1 mod f
-            if g_2.coef.len() == 0 {
-                g_2.coef.push(FiniteField {
-                    char: char,
-                    element: Element::PrimeField { element: 0 },
-                });
-                g_2.coef.push(FiniteField {
-                    char: char,
-                    element: Element::PrimeField {
-                        element: (char - 1) as NumType,
-                    },
-                });
-            } else if g_2.coef.len() == 1 {
-                g_2.coef.push(FiniteField {
-                    char: char,
-                    element: Element::PrimeField {
-                        element: (char - 1) as NumType,
-                    },
-                });
-            } else {
-                g_2.coef[1] = g_2.coef[1].clone() - g_2.coef[0].get_1();
-            }
-            g_2 = g_2.adjust_func();
-
-            let h = Polynomial::gcd(&f, g_2);
-            if !(h.coef.len() <= 1 && h.coef[0].is_1()) {
-                end_flag = false;
-                break;
-            }
-        }
-
-        if end_flag == true {
-            answer = f;
-            break;
-        }
-    }
-    answer
-}
-
 #[cfg(test)]
 mod tests {
 
     use crate::Element;
     #[cfg(test)]
     use crate::FiniteField;
-    use crate::Polynomial;
     fn it_works() {
         let char: u32 = 2;
         let element0 = FiniteField {
@@ -1099,5 +1098,5 @@ mod tests {
             element: Element::PrimeField { element: 1 },
         };
         let answer = element0 + element1;
-    }
+	}
 }
