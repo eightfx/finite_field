@@ -1,21 +1,21 @@
 
 # Table of Contents
 
-1.  [finite fields](#orgf01426c)
-2.  [What makes it different from other libraries?](#org878e6fd)
-    1.  [Pros:](#org4fbab85)
-    2.  [Cons:](#org58f27db)
-3.  [Usage](#orge654b80)
-4.  [Examples](#orgde93be1)
-    1.  [Prime Field](#org97fa9e8)
-    2.  [Galois Field](#org28f0aa8)
-    3.  [Polynomial over F<sub>p</sub>](#org45902fa)
-    4.  [Polynomial over GF(p<sup>n</sup>)](#org61c850c)
-    5.  [Matrix over FiniteField](#org0b40501)
-5.  [Link](#org6c0dad0)
+1.  [finite fields](#org068f34c)
+2.  [What makes it different from other libraries?](#orgf6d5f0f)
+    1.  [Pros:](#org47b98b4)
+    2.  [Cons:](#orga9135ee)
+3.  [Usage](#org029522d)
+4.  [Examples](#org8c95d1c)
+    1.  [Prime Field](#orgccf1c10)
+    2.  [Galois Field](#orgf02c6c0)
+    3.  [Polynomial over F<sub>p</sub>](#org5b8e57a)
+    4.  [Polynomial over GF(p<sup>n</sup>)](#orge7bbdc3)
+    5.  [Matrix over FiniteField](#orgb027911)
+5.  [Link](#org1821e10)
 
 
-<a id="orgf01426c"></a>
+<a id="org068f34c"></a>
 
 # finite fields
 
@@ -31,12 +31,12 @@ A Rust library for operations on finite field, featuring:
 -   The sweep method (or Gaussian elimination) of matrices on finite bodies (F<sub>p</sub>, GF(p<sup>n</sup>)) is also available.
 
 
-<a id="org878e6fd"></a>
+<a id="orgf6d5f0f"></a>
 
 # What makes it different from other libraries?
 
 
-<a id="org4fbab85"></a>
+<a id="org47b98b4"></a>
 
 ## Pros:
 
@@ -47,29 +47,29 @@ A Rust library for operations on finite field, featuring:
 -   The sweep method can be available.
 
 
-<a id="org58f27db"></a>
+<a id="orga9135ee"></a>
 
 ## Cons:
 
 -   It takes longer than other libraries because it is not optimized for each character.
 
 
-<a id="orge654b80"></a>
+<a id="org029522d"></a>
 
 # Usage
 
 Add this to your Cargo.toml:
 
     [dependencies]
-    galois_field = "0.1.3"
+    galois_field = "0.1.5"
 
 
-<a id="orgde93be1"></a>
+<a id="org8c95d1c"></a>
 
 # Examples
 
 
-<a id="org97fa9e8"></a>
+<a id="orgccf1c10"></a>
 
 ## Prime Field
 
@@ -96,7 +96,7 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="org28f0aa8"></a>
+<a id="orgf02c6c0"></a>
 
 ## Galois Field
 
@@ -123,7 +123,7 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="org45902fa"></a>
+<a id="org5b8e57a"></a>
 
 ## Polynomial over F<sub>p</sub>
 
@@ -158,14 +158,14 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="org61c850c"></a>
+<a id="orge7bbdc3"></a>
 
 ## Polynomial over GF(p<sup>n</sup>)
 
 Same as above
 
 
-<a id="org0b40501"></a>
+<a id="orgb027911"></a>
 
 ## Matrix over FiniteField
 
@@ -202,7 +202,7 @@ Same as above
     println!("{:?}", sweep_matrix);
 
 
-<a id="org6c0dad0"></a>
+<a id="org1821e10"></a>
 
 # Link
 

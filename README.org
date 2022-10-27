@@ -26,7 +26,7 @@ A Rust library for operations on finite field, featuring:
 Add this to your Cargo.toml:
 #+begin_src
 [dependencies]
-galois_field = "0.1.3"
+galois_field = "0.1.5"
 #+end_src
 
 * Examples

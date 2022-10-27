@@ -171,9 +171,7 @@ impl Matrix{
 					break;
 				}
 				else{
-					let tmp = matrix.element[i].clone();
-					matrix.element[i] = matrix.element[j].clone();
-					matrix.element[j] = tmp;
+					(matrix.element[i],matrix.element[j]) = (matrix.element[j].clone(),matrix.element[i].clone());
 				}
 			}
 
@@ -184,8 +182,8 @@ impl Matrix{
 			}
 
 			let mut h_xi:Vec<FiniteField> = Vec::new();
-			for j in 0..m{
-				h_xi.push(matrix.element[j][i].clone());
+			for k in 0..n{
+				h_xi.push(matrix.element[k][i].clone());
 			}
 
 			// sub to 0
