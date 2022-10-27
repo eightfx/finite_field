@@ -1,17 +1,18 @@
 
 # Table of Contents
 
-1.  [finite<sub>fields</sub>](#orgf45fd8d)
-2.  [Usage](#org8057ed2)
-3.  [Examples](#orge955a46)
-    1.  [Prime Field](#orgb574a95)
-    2.  [Galois Field](#org0f6e3c0)
-    3.  [Polynomial over F<sub>p</sub>](#orgf80df41)
+1.  [finite fields](#orgaab0fac)
+2.  [Usage](#org2bf5df6)
+3.  [Examples](#orgd370771)
+    1.  [Prime Field](#org8bcb888)
+    2.  [Galois Field](#org14e2007)
+    3.  [Polynomial over F<sub>p</sub>](#orgcb0604b)
+    4.  [Polynomial over GF(p<sup>n</sup>)](#org82c298b)
 
 
-<a id="orgf45fd8d"></a>
+<a id="orgaab0fac"></a>
 
-# finite<sub>fields</sub>
+# finite fields
 
 A Rust library for operations on finite field, featuring:
 
@@ -22,7 +23,7 @@ A Rust library for operations on finite field, featuring:
 -   Sum, difference, product, quotient, and remainder of polynomial over GF(p<sup>n</sup>)
 
 
-<a id="org8057ed2"></a>
+<a id="org2bf5df6"></a>
 
 # Usage
 
@@ -32,12 +33,12 @@ Add this to your Cargo.toml:
     finite_fields = "0.1.0"
 
 
-<a id="orge955a46"></a>
+<a id="orgd370771"></a>
 
 # Examples
 
 
-<a id="orgb574a95"></a>
+<a id="org8bcb888"></a>
 
 ## Prime Field
 
@@ -59,7 +60,7 @@ Add this to your Cargo.toml:
     println!("x / y = {:?}", x / y);
 
 
-<a id="org0f6e3c0"></a>
+<a id="org14e2007"></a>
 
 ## Galois Field
 
@@ -86,7 +87,7 @@ Add this to your Cargo.toml:
         println!("x / y = {:?}", (x / y).element);
 
 
-<a id="orgf80df41"></a>
+<a id="orgcb0604b"></a>
 
 ## Polynomial over F<sub>p</sub>
 
@@ -116,4 +117,11 @@ Add this to your Cargo.toml:
     println!("f1 * f2 = {:?}", (f1 * f2).coef);
     println!("f1 / f2 = {:?}", (f1 / f2).coef);
     println!("f1 % f2 = {:?}", (f1 % f2).coef);
+
+
+<a id="org82c298b"></a>
+
+## Polynomial over GF(p<sup>n</sup>)
+
+Same as above
 
