@@ -589,7 +589,7 @@ impl ops::Div for Polynomial {
 
         // drop0
         for i in 0..f_inv.len() {
-			if f_inv.len() == 1{break;}
+			if f_inv.len() <= 1{break;}
 			if f_inv[i].is_0() {
 				f_inv.remove(0);
 			} else {
@@ -597,7 +597,7 @@ impl ops::Div for Polynomial {
 			}
         }
         for i in 0..g_inv.len() {
-			if g_inv.len() == 1{break;}
+			if g_inv.len() <= 1{break;}
             if g_inv[i].is_0() {
                 g_inv.remove(0);
             } else {
@@ -638,7 +638,7 @@ impl ops::Rem for Polynomial {
 
         // drop0
         for i in 0..f_inv.len() {
-			if f_inv.len() == 1{break;}
+			if f_inv.len() <= 1{break;}
             if f_inv[i].is_0() {
                 f_inv.remove(0);
             } else {
@@ -646,7 +646,7 @@ impl ops::Rem for Polynomial {
             }
         }
         for i in 0..g_inv.len() {
-			if g_inv.len() == 1{break;}
+			if g_inv.len() <= 1{break;}
             if g_inv[i].is_0() {
                 g_inv.remove(0);
             } else {
