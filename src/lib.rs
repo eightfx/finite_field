@@ -3,25 +3,24 @@
 //! finitefields provides utilities to perform operations between Galois Field and between polynomials that have Galois Field as coefficients.
 //!
 //! # Quick Start
-//! # Case 1: Prime Field
+//! ## Case 1: Prime Field
 //! ```
-//! use finite_field::*;
-//!  let char = 3;
-//! let x:FiniteField = FiniteField {
-//!     char: char,
-//!     element: Element::PrimeField { element: 0 },
-//! },
-//! let y:FiniteField =  FiniteField {
-//!     char: char,
-//!     element: Element::PrimeField { element: 0 },
-//! },
-//! println!("x + y = {}", x + y);
-//! println!("x - y = {}", x - y);
-//! println!("x * y = {}", x * y);
-//! println!("x / y = {}", x / y);
+//! let char: u32 = 5;
+//! let x:FiniteField = FiniteField{
+//! 	char: char,
+//! 	element:Element::PrimeField{element:0} // 0 in F_5
+//! };
+//! let y:FiniteField = FiniteField{
+//! 	char: char,
+//! 	element:Element::PrimeField{element:1} // 1 in F_5
+//! };
+//! println!("x + y = {:?}", (x.clone() + y.clone()).element); // ->1
+//! println!("x - y = {:?}", (x.clone() - y.clone()).element); // -> 4
+//! println!("x * y = {:?}", (x.clone() * y.clone()).element); // -> 0
+//! println!("x / y = {:?}", (x.clone() / y.clone()).element); // -> 0
 //! ```
 //!
-//! # Case 2: Galois Field
+//! ## Case 2: Galois Field
 //! Remark:
 //! - The source of GF(p^n) is represented by a polynomial basis.
 //!
@@ -32,50 +31,54 @@
 //! use finite_field::*;
 //!
 //! // consider GF(2^4)
-//! let char = 2;
+//! let char: u32 = 2;
 //! let n = 4;
-//! let primitive_polynomial = Polynomial::get_primitive_polynomial(char,n);
-//! let x:FiniteField = FiniteField {
-//!     char: self.char,
-//!     element: Element::PrimeField { element: vec![0,1] }, // i.e. [0,1] = x -> 2 over GF(2^4)
-//! },
-//! let y:FiniteField =  FiniteField {
-//!     char: self.char,
-//!     element: Element::PrimeField { element: [0,0,1,1] }, // i.e. [0,0,1,1] = x^3+x^2 -> 12 over GF(2^4)
-//! },
-//! println!("x + y = {}", x + y);
-//! println!("x - y = {}", x - y);
-//! println!("x * y = {}", x * y);
-//! println!("x / y = {}", x / y);
+//! let primitive_polynomial = Polynomial::get_primitive_polynomial(char, n);
+//! let x:FiniteField = FiniteField{
+//! 	char: char,
+//! 	element:Element::GaloisField{element:vec![0,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,1] = x -> 2 over GF(2^4)
+//! };
+//! let y:FiniteField = FiniteField{
+//! 	char: char,
+//! 	element:Element::GaloisField{element:vec![0,0,1,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,0,1,1] = x^3 + x^2 -> 12 over GF(2^4)
+//! };
+//! println!("x + y = {:?}", (x.clone() + y.clone()).element);
+//! println!("x - y = {:?}", (x.clone() - y.clone()).element);
+//! println!("x * y = {:?}", (x.clone() * y.clone()).element);
+//! println!("x / y = {:?}", (x.clone() / y.clone()).element);
 //! ```
 //!
-//! # Case 3: Polynomial over Prime Field
+//! ## Case 3: Polynomial over Prime Field
 //! ```
-//! use finite_field::*;
-//!
-//! let char = 3;
-//! let element0 = FiniteField {
+//! use galois_field::*;
+//! // This is a test of the elementary F_p, Galois GF(p^n), polynomial quadrature.
+//! 	// character
+//! let char: u32 = 2;
+//! let element0:FiniteField = FiniteField{
 //! 	char: char,
-//! 	element: Element::PrimeField { element: 0 }, // i.e. 0 over GF(3)
+//! 	element:Element::PrimeField{element:0} // 0 in F_5
 //! };
-//! let element1 = FiniteField {
+//! let element1:FiniteField = FiniteField{
 //! 	char: char,
-//! 	element: Element::PrimeField { element: 1 }, // i.e. 1 over GF(3)
+//! 	element:Element::PrimeField{element:1} // 1 in F_5
 //! };
-//! let f1: Polynomial = Polynomial {
-//! 	char: char,
-//! 	coef: vec![element0, element1], // i.e. 0 + 1*x
+//! // operations between GaloisField elements
+//! // we need primitive_polynomial
+//! let primitive_polynomial = Polynomial::get_primitive_polynomial(char,4);
+//! let f: Polynomial = Polynomial {
+//!     coef: vec![element1.clone(),element0.clone(),element0.clone(),element0.clone(),element1.clone()]
 //! };
-//! let f2: Polynomial = Polynomial {
-//! 	char: char,
-//! 	coef: vec![element0, element1, element1], // i.e. 0 + 1*x + 1*x^2
+//! let g: Polynomial = Polynomial {
+//! 	coef: vec![element1.clone(),element0.clone(),element0.clone(),element1.clone(),element1.clone()]
 //! };
-//! println!("f1 + f2 = {}", f1 + f2);
-//! println!("f1 - f2 = {}", f1 - f2);
-//! println!("f1 * f2 = {}", f1 * f2);
-//! println!("f1 / f2 = {}", f1 / f2);
-//! println!("f1 % f2 = {}", f1 % f2);
+//! println!("f + g = {:?}", (f.clone()+g.clone()).coef);
+//! println!("f - g = {:?}", (f.clone()-g.clone()).coef);
+//! println!("f * g = {:?}", (f.clone()*g.clone()).coef);
+//! println!("f / g = {:?}", (f.clone()/g.clone()).coef);
+//! println!("f % g = {:?}", (f.clone()%g.clone()).coef);
 //! ```
+//! ## Case 4: Polynomial over Galois Field
+//! same as above.
 
 use std::ops;
 // type of number , ex: i32
@@ -94,13 +97,13 @@ type NumType = i32;
 /// Example: GF(2^2), GF(5^3), ...
 #[derive(Debug, Clone)]
 pub enum Element {
-    PrimeField {
-        element: NumType,
-    },
-    GaloisField {
-        element: Vec<NumType>,
-        primitive_polynomial: Polynomial,
-    },
+	PrimeField {
+		element: NumType,
+	},
+	GaloisField {
+		element: Vec<NumType>,
+		primitive_polynomial: Polynomial,
+	},
 }
 
 /// Polynomial over FiniteField.
@@ -108,13 +111,13 @@ pub enum Element {
 /// Either prime field F_p or Galois field GF(p^n) can be used as coefficients
 #[derive(Debug, Clone)]
 pub struct Polynomial {
-    pub coef: Vec<FiniteField>,
+	pub coef: Vec<FiniteField>,
 }
 
 #[derive(Debug, Clone)]
 pub struct FiniteField {
-    pub char: u32,
-    pub element: Element,
+	pub char: u32,
+	pub element: Element,
 }
 impl Polynomial {
 	pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
@@ -210,190 +213,190 @@ impl Polynomial {
 		answer
 	}
 
-    pub fn assign_value(&mut self, value: FiniteField) -> FiniteField {
-        // assign value to polynomial
-        // example: f.coef = [0,1,2] i.e. f(x) = 2x^2 + x + 0, then
-        // f.assign_value(2) = 2*2^2 + 2*1 + 2*0 = 8 = 3 (mod 5)
-        let mut result: FiniteField = FiniteField {
-            char: self.coef[0].char,
-            element: self.coef[0].element.clone(),
-        };
+	pub fn assign_value(&mut self, value: FiniteField) -> FiniteField {
+		// assign value to polynomial
+		// example: f.coef = [0,1,2] i.e. f(x) = 2x^2 + x + 0, then
+		// f.assign_value(2) = 2*2^2 + 2*1 + 2*0 = 8 = 3 (mod 5)
+		let mut result: FiniteField = FiniteField {
+			char: self.coef[0].char,
+			element: self.coef[0].element.clone(),
+		};
 
-        let value_origin = value.clone();
-        let mut value = value;
-        for i in 0..self.coef.len() {
-            if i == 0 {
-                result = self.coef[i].clone();
-            } else {
-                result = result + (self.coef[i].clone() * value.clone());
-                value = value * value_origin.clone();
-            }
-        }
-        result
-    }
-    fn adjust_func(&mut self) -> Polynomial {
-        /* Adjust the function to fit the format
+		let value_origin = value.clone();
+		let mut value = value;
+		for i in 0..self.coef.len() {
+			if i == 0 {
+				result = self.coef[i].clone();
+			} else {
+				result = result + (self.coef[i].clone() * value.clone());
+				value = value * value_origin.clone();
+			}
+		}
+		result
+	}
+	fn adjust_func(&mut self) -> Polynomial {
+		/* Adjust the function to fit the format
 
-        examples:
-        if coef == [] -> coef = [0]
-        if coef == [1,0] -> coef = [1]  i.e. 1 + 0*x -> 1
-         */
-        let mut coef_inv: Vec<FiniteField> = self.coef.clone();
-        coef_inv.reverse();
-        for _ in 0..coef_inv.len() {
-            if coef_inv[0].is_0() {
-                coef_inv.remove(0);
-            } else {
-                break;
-            }
-        }
-        coef_inv.reverse();
-        if coef_inv.len() == 0 {
-            coef_inv.push(FiniteField {
-                char: self.coef[0].char,
-                element: self.coef[0].get_0().element,
-            });
-        };
+		examples:
+		if coef == [] -> coef = [0]
+		if coef == [1,0] -> coef = [1]  i.e. 1 + 0*x -> 1
+		 */
+		let mut coef_inv: Vec<FiniteField> = self.coef.clone();
+		coef_inv.reverse();
+		for _ in 0..coef_inv.len() {
+			if coef_inv[0].is_0() {
+				coef_inv.remove(0);
+			} else {
+				break;
+			}
+		}
+		coef_inv.reverse();
+		if coef_inv.len() == 0 {
+			coef_inv.push(FiniteField {
+				char: self.coef[0].char,
+				element: self.coef[0].get_0().element,
+			});
+		};
 
-        Polynomial { coef: coef_inv }
-    }
-    pub fn gcd(&self, other: Polynomial) -> Polynomial {
-        // get GCD of two polynomials
-        // examples:
-        // f.gcd(g) means GCD(f,g)
-        let mut f: Polynomial = self.clone();
-        let mut g: Polynomial = other.clone();
-        let answer: Polynomial;
+		Polynomial { coef: coef_inv }
+	}
+	pub fn gcd(&self, other: Polynomial) -> Polynomial {
+		// get GCD of two polynomials
+		// examples:
+		// f.gcd(g) means GCD(f,g)
+		let mut f: Polynomial = self.clone();
+		let mut g: Polynomial = other.clone();
+		let answer: Polynomial;
 
-        if f.coef.len() < g.coef.len() {
-            (f, g) = (g, f);
-        }
-        loop {
-            f = f.adjust_func();
-            g = g.adjust_func();
+		if f.coef.len() < g.coef.len() {
+			(f, g) = (g, f);
+		}
+		loop {
+			f = f.adjust_func();
+			g = g.adjust_func();
 
-            let mut flag_0 = true;
-            // every coef of g is 0 -> flag_0 = true
-            for i in 0..g.coef.len() {
-                if !g.coef[i].is_0() {
-                    flag_0 = false;
-                    break;
-                }
-            }
+			let mut flag_0 = true;
+			// every coef of g is 0 -> flag_0 = true
+			for i in 0..g.coef.len() {
+				if !g.coef[i].is_0() {
+					flag_0 = false;
+					break;
+				}
+			}
 
-            // end
-            if flag_0 {
-                answer = f;
-                break;
-            }
+			// end
+			if flag_0 {
+				answer = f;
+				break;
+			}
 
-            let remainder = f.clone() % g.clone();
-            (f, g) = (g, remainder);
-        }
+			let remainder = f.clone() % g.clone();
+			(f, g) = (g, remainder);
+		}
 
-        answer
-    }
+		answer
+	}
 }
 impl FiniteField {
-    pub fn get_0(&self) -> FiniteField {
-        // get 0 in the same field
-        match &self.element {
-            Element::PrimeField { element: _ } => FiniteField {
-                char: self.char,
-                element: Element::PrimeField { element: 0 },
-            },
-            Element::GaloisField {
-                element: _,
-                primitive_polynomial: pp,
-            } => FiniteField {
-                char: self.char,
-                element: Element::GaloisField {
-                    element: vec![0],
-                    primitive_polynomial: pp.clone(),
-                },
-            },
-        }
-    }
-    pub fn get_1(&self) -> FiniteField {
-        // get 1 in the same field
-        match &self.element {
-            Element::PrimeField { element: _ } => FiniteField {
-                char: self.char,
-                element: Element::PrimeField { element: 1 },
-            },
-            Element::GaloisField {
-                element: _,
-                primitive_polynomial: pp,
-            } => FiniteField {
-                char: self.char,
-                element: Element::GaloisField {
-                    element: vec![1],
-                    primitive_polynomial: pp.clone(),
-                },
-            },
-        }
-    }
+	pub fn get_0(&self) -> FiniteField {
+		// get 0 in the same field
+		match &self.element {
+			Element::PrimeField { element: _ } => FiniteField {
+				char: self.char,
+				element: Element::PrimeField { element: 0 },
+			},
+			Element::GaloisField {
+				element: _,
+				primitive_polynomial: pp,
+			} => FiniteField {
+				char: self.char,
+				element: Element::GaloisField {
+					element: vec![0],
+					primitive_polynomial: pp.clone(),
+				},
+			},
+		}
+	}
+	pub fn get_1(&self) -> FiniteField {
+		// get 1 in the same field
+		match &self.element {
+			Element::PrimeField { element: _ } => FiniteField {
+				char: self.char,
+				element: Element::PrimeField { element: 1 },
+			},
+			Element::GaloisField {
+				element: _,
+				primitive_polynomial: pp,
+			} => FiniteField {
+				char: self.char,
+				element: Element::GaloisField {
+					element: vec![1],
+					primitive_polynomial: pp.clone(),
+				},
+			},
+		}
+	}
 
-    pub fn is_0(&self) -> bool {
-        // check if the element is 0
-        match &self.element {
-            Element::PrimeField { element: e } => *e == 0,
-            Element::GaloisField {
-                element: e,
-                primitive_polynomial: _,
-            } => (e[0] == 0) && (e.len() == 1),
-        }
-    }
-    pub fn is_1(&self) -> bool {
-        // check if the element is 1
-        match &self.element {
-            Element::PrimeField { element: e } => *e == 1,
-            Element::GaloisField {
-                element: e,
-                primitive_polynomial: _,
-            } => {
-                let sum: NumType = e.iter().sum();
-                (e[0] == 1) && (sum == 1)
-            }
-        }
-    }
+	pub fn is_0(&self) -> bool {
+		// check if the element is 0
+		match &self.element {
+			Element::PrimeField { element: e } => *e == 0,
+			Element::GaloisField {
+				element: e,
+				primitive_polynomial: _,
+			} => (e[0] == 0) && (e.len() == 1),
+		}
+	}
+	pub fn is_1(&self) -> bool {
+		// check if the element is 1
+		match &self.element {
+			Element::PrimeField { element: e } => *e == 1,
+			Element::GaloisField {
+				element: e,
+				primitive_polynomial: _,
+			} => {
+				let sum: NumType = e.iter().sum();
+				(e[0] == 1) && (sum == 1)
+			}
+		}
+	}
 }
 
 // Polynomial
 impl ops::Add for Polynomial {
-    type Output = Polynomial;
-    fn add(self, other: Polynomial) -> Polynomial {
-        let mut result = Polynomial { coef: Vec::new() };
-        let max_degree = if self.coef.len() > other.coef.len() {
-            self.coef.len()
-        } else {
-            other.coef.len()
-        };
-        let min_degree = if self.coef.len() < other.coef.len() {
-            self.coef.len()
-        } else {
-            other.coef.len()
-        };
+	type Output = Polynomial;
+	fn add(self, other: Polynomial) -> Polynomial {
+		let mut result = Polynomial { coef: Vec::new() };
+		let max_degree = if self.coef.len() > other.coef.len() {
+			self.coef.len()
+		} else {
+			other.coef.len()
+		};
+		let min_degree = if self.coef.len() < other.coef.len() {
+			self.coef.len()
+		} else {
+			other.coef.len()
+		};
 
-        for i in 0..min_degree {
-            result
-                .coef
-                .push(self.coef[i].clone() + other.coef[i].clone());
-        }
-        for i in min_degree..max_degree {
-            if self.coef.len() > other.coef.len() {
-                result.coef.push(self.coef[i].clone());
-            } else {
-                result.coef.push(other.coef[i].clone());
-            }
-        }
-        result.adjust_func()
-    }
+		for i in 0..min_degree {
+			result
+				.coef
+				.push(self.coef[i].clone() + other.coef[i].clone());
+		}
+		for i in min_degree..max_degree {
+			if self.coef.len() > other.coef.len() {
+				result.coef.push(self.coef[i].clone());
+			} else {
+				result.coef.push(other.coef[i].clone());
+			}
+		}
+		result.adjust_func()
+	}
 }
 
 impl ops::Sub for Polynomial {
-    type Output = Polynomial;
-    fn sub(self, other: Polynomial) -> Polynomial {
+	type Output = Polynomial;
+	fn sub(self, other: Polynomial) -> Polynomial {
         let mut result = Polynomial { coef: Vec::new() };
         let max_degree = if self.coef.len() > other.coef.len() {
             self.coef.len()
