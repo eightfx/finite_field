@@ -11,7 +11,7 @@ A Rust library for operations on finite field, featuring:
 
 ** Pros:
 - Can be calculated with F_p, GF(p^n) for any prime and any multiplier, not limited to a char 2.
-- Can freely compute four types of polynomials: prime, Galois, polynomial of prime, and polynomial of Galois.
+- Can freely compute four types of element: prime, Galois, polynomial of prime, and polynomial of Galois.
 - Each can be calculated with +-*/, so you can write natural code.
   
 ** Cons:
