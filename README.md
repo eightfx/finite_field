@@ -1,16 +1,19 @@
 
 # Table of Contents
 
-1.  [finite fields](#orgaab0fac)
-2.  [Usage](#org2bf5df6)
-3.  [Examples](#orgd370771)
-    1.  [Prime Field](#org8bcb888)
-    2.  [Galois Field](#org14e2007)
-    3.  [Polynomial over F<sub>p</sub>](#orgcb0604b)
-    4.  [Polynomial over GF(p<sup>n</sup>)](#org82c298b)
+1.  [finite fields](#org3259b18)
+2.  [What makes it different from other libraries?](#org7978785)
+    1.  [Pros:](#orgd403e91)
+    2.  [Cons:](#org2790d14)
+3.  [Usage](#org75399a8)
+4.  [Examples](#orgc0e3013)
+    1.  [Prime Field](#org6bbe7cf)
+    2.  [Galois Field](#org71ba6be)
+    3.  [Polynomial over F<sub>p</sub>](#orgb8a2cb5)
+    4.  [Polynomial over GF(p<sup>n</sup>)](#org99d0356)
 
 
-<a id="orgaab0fac"></a>
+<a id="org3259b18"></a>
 
 # finite fields
 
@@ -23,7 +26,28 @@ A Rust library for operations on finite field, featuring:
 -   Sum, difference, product, quotient, and remainder of polynomial over GF(p<sup>n</sup>)
 
 
-<a id="org2bf5df6"></a>
+<a id="org7978785"></a>
+
+# What makes it different from other libraries?
+
+
+<a id="orgd403e91"></a>
+
+## Pros:
+
+-   Can be calculated with F<sub>p</sub>, GF(p<sup>n</sup>) for any prime and any multiplier, not limited to a char 2.
+-   Can freely compute four types of polynomials: prime, Galois, polynomial of prime, and polynomial of Galois.
+-   Each can be calculated with +-\*/, so you can write natural code.
+
+
+<a id="org2790d14"></a>
+
+## Cons:
+
+-   It takes longer than other libraries because it is not optimized for each character.
+
+
+<a id="org75399a8"></a>
 
 # Usage
 
@@ -33,12 +57,12 @@ Add this to your Cargo.toml:
     finite_fields = "0.1.0"
 
 
-<a id="orgd370771"></a>
+<a id="orgc0e3013"></a>
 
 # Examples
 
 
-<a id="org8bcb888"></a>
+<a id="org6bbe7cf"></a>
 
 ## Prime Field
 
@@ -60,7 +84,7 @@ Add this to your Cargo.toml:
     println!("x / y = {:?}", x / y);
 
 
-<a id="org14e2007"></a>
+<a id="org71ba6be"></a>
 
 ## Galois Field
 
@@ -87,7 +111,7 @@ Add this to your Cargo.toml:
         println!("x / y = {:?}", (x / y).element);
 
 
-<a id="orgcb0604b"></a>
+<a id="orgb8a2cb5"></a>
 
 ## Polynomial over F<sub>p</sub>
 
@@ -119,7 +143,7 @@ Add this to your Cargo.toml:
     println!("f1 % f2 = {:?}", (f1 % f2).coef);
 
 
-<a id="org82c298b"></a>
+<a id="org99d0356"></a>
 
 ## Polynomial over GF(p<sup>n</sup>)
 
