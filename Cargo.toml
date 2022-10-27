@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 authors = ["eightt"]
 repository = "https://github.com/eightfx/finite_field"
-
+license = "MIT"
+description = "Libraries for computing quadratic operations on finite numbers, quadratic operations between polynomials with finite numbers as coefficients."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

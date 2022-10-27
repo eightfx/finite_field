@@ -1084,8 +1084,8 @@ fn change_base_from10_to_n(x: NumType, n: NumType) -> Vec<NumType> {
 #[cfg(test)]
 mod tests {
 
-    use crate::Element;
     #[cfg(test)]
+    use crate::Element;
     use crate::FiniteField;
     fn it_works() {
         let char: u32 = 2;
