@@ -3,12 +3,20 @@ use crate::finite::*;
 
 
 fn main() {
-	let char: u32 = 2;
-	let length = 4;
-	let pp = get_primitive_polynomial(char, length);
+	let char: u32 = 5;
+	let length = 3;
+	let mut pp = get_primitive_polynomial(char, length);
 	println!("Primitive polynomial: {:?}", pp.coef);
-	
+
 	let element1: Element = Element::PrimeField { element: 0 };
+	let element1: FiniteField = FiniteField {
+		char: char,
+		element: Element::PrimeField { element: 2 },
+	};
+
+	let ans = pp.assign_value(element1);
+	println!("Assign value: {:?}", ans);
+	
 	let element2: Element = Element::PrimeField { element: 1 };
 	let element3: Element = Element::PrimeField { element: 1 };
 
@@ -52,26 +60,26 @@ fn main() {
 	// 	primitive_polynomial: primitive_polynomial.clone(),
 	// };
 
-	let element1: FiniteField = FiniteField {
-		char: char,
-		element: element1,
-	};
-	let element2: FiniteField = FiniteField {
-		char: char,
-		element: element2,
-	};
-	let element3: FiniteField = FiniteField {
-		char: char,
-		element: element3,
-	};
-	let poly1 = Polynomial {
-    	char: char,
-    	coef: vec![element2.clone(), element1.clone(), element2.clone()],
-	};
-	let poly2 = Polynomial {
-    	char: char,
-    	coef: vec![element2.clone(),element2.clone()],
-	};
+	// let element1: FiniteField = FiniteField {
+	// 	char: char,
+	// 	element: element1,
+	// };
+	// let element2: FiniteField = FiniteField {
+	// 	char: char,
+	// 	element: element2,
+	// };
+	// let element3: FiniteField = FiniteField {
+	// 	char: char,
+	// 	element: element3,
+	// };
+	// let poly1 = Polynomial {
+    // 	char: char,
+    // 	coef: vec![element2.clone(), element1.clone(), element2.clone()],
+	// };
+	// let poly2 = Polynomial {
+    // 	char: char,
+    // 	coef: vec![element2.clone(),element2.clone()],
+	// };
 
 	// // println!("{:?}", (element2*element1).element);
 	// println!("{:?}", (poly1/poly2).coef); 
