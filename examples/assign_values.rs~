@@ -1,0 +1,21 @@
+mod finite;
+use crate::finite::*;
+
+
+fn main{
+	let char: u32 = 5;
+	let length = 3;
+	let mut pp = get_primitive_polynomial(char, length);
+	println!("Primitive polynomial: {:?}", pp.coef);
+
+	let element1: Element = Element::PrimeField { element: 0 };
+	let element1: FiniteField = FiniteField {
+		char: char,
+		element: Element::PrimeField { element: 2 },
+	};
+
+	let ans = pp.assign_value(element1);
+	println!("Assign value: {:?}", ans);
+	
+	
+}
