@@ -1,19 +1,20 @@
 
 # Table of Contents
 
-1.  [finite fields](#org0c6032c)
-2.  [What makes it different from other libraries?](#org967e2ae)
-    1.  [Pros:](#org15959d8)
-    2.  [Cons:](#orgd1a6544)
-3.  [Usage](#org5dfe1ed)
-4.  [Examples](#orga2cbc7b)
-    1.  [Prime Field](#org415d4cf)
-    2.  [Galois Field](#orge2ecb95)
-    3.  [Polynomial over F<sub>p</sub>](#org50e4e6d)
-    4.  [Polynomial over GF(p<sup>n</sup>)](#orgd40f06d)
+1.  [finite fields](#org784fa80)
+2.  [What makes it different from other libraries?](#org7e18361)
+    1.  [Pros:](#org919bd42)
+    2.  [Cons:](#org9cc525b)
+3.  [Usage](#org7d96c0d)
+4.  [Examples](#org917f655)
+    1.  [Prime Field](#org7002141)
+    2.  [Galois Field](#org088f24c)
+    3.  [Polynomial over F<sub>p</sub>](#org7178728)
+    4.  [Polynomial over GF(p<sup>n</sup>)](#orge27cfd8)
+    5.  [Matrix over FiniteField](#org83082c6)
 
 
-<a id="org0c6032c"></a>
+<a id="org784fa80"></a>
 
 # finite fields
 
@@ -24,30 +25,35 @@ A Rust library for operations on finite field, featuring:
 -   Obtaining the primitive polynomial
 -   Sum, difference, product, quotient, and remainder of polynomial over F<sub>p</sub>
 -   Sum, difference, product, quotient, and remainder of polynomial over GF(p<sup>n</sup>)
+-   Sum, product of Matrix F<sub>p</sub>
+-   Sum, product of Matrix GF(p<sup>n</sup>)
+-   The sweep method (or Gaussian elimination) of matrices on finite bodies (F<sub>p</sub>, GF(p<sup>n</sup>)) is also available.
 
 
-<a id="org967e2ae"></a>
+<a id="org7e18361"></a>
 
 # What makes it different from other libraries?
 
 
-<a id="org15959d8"></a>
+<a id="org919bd42"></a>
 
 ## Pros:
 
 -   Can be calculated with F<sub>p</sub>, GF(p<sup>n</sup>) for any prime and any multiplier, not limited to a char 2.
 -   Can freely compute four types of element: prime, Galois, polynomial of prime, and polynomial of Galois.
 -   Each can be calculated with +-\*/, so you can write natural code.
+-   Matrix operations on finite bodies (F<sub>p</sub>, GF(p<sup>n</sup>)) can also be performed.
+-   The sweep method can be available.
 
 
-<a id="orgd1a6544"></a>
+<a id="org9cc525b"></a>
 
 ## Cons:
 
 -   It takes longer than other libraries because it is not optimized for each character.
 
 
-<a id="org5dfe1ed"></a>
+<a id="org7d96c0d"></a>
 
 # Usage
 
@@ -57,12 +63,12 @@ Add this to your Cargo.toml:
     galois_field = "0.1.3"
 
 
-<a id="orga2cbc7b"></a>
+<a id="org917f655"></a>
 
 # Examples
 
 
-<a id="org415d4cf"></a>
+<a id="org7002141"></a>
 
 ## Prime Field
 
@@ -89,7 +95,7 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="orge2ecb95"></a>
+<a id="org088f24c"></a>
 
 ## Galois Field
 
@@ -116,7 +122,7 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="org50e4e6d"></a>
+<a id="org7178728"></a>
 
 ## Polynomial over F<sub>p</sub>
 
@@ -151,9 +157,46 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="orgd40f06d"></a>
+<a id="orge27cfd8"></a>
 
 ## Polynomial over GF(p<sup>n</sup>)
 
 Same as above
+
+
+<a id="org83082c6"></a>
+
+## Matrix over FiniteField
+
+    use galois_field::*;
+    
+    let char = 3;
+    let element0: FiniteField = FiniteField {
+        char: char,
+        element: Element::PrimeField { element: 0 },
+    };
+    let element1: FiniteField = FiniteField {
+        char: char,
+        element: Element::PrimeField { element: 1 },
+    };
+    let element2: FiniteField = FiniteField {
+        char: char,
+        element: Element::PrimeField { element: 2 },
+    };
+    
+    
+    let mut matrix_element:Vec<Vec<FiniteField>> = vec![
+        vec![element0.clone(),element1.clone(), element0.clone()],
+        vec![element2.clone(),element2.clone(), element1.clone()],
+        vec![element1.clone(),element0.clone(), element1.clone()]
+    ];
+    let mut matrix = Matrix{
+        element: matrix_element,
+    };
+    
+    println!("m+m = {:?}", m.clone()+m.clone());
+    println!("m*m = {:?}", m.clone()*m.clone());
+    
+    let mut sweep_matrix = m.sweep_method();
+    println!("{:?}", sweep_matrix);
 

@@ -1,14 +1,14 @@
 [package]
 name = "galois_field"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["eightt"]
 repository = "https://github.com/eightfx/finite_field"
 license = "MIT"
-description = "Libraries for computing quadratic operations on finite numbers, quadratic operations between polynomials with finite numbers as coefficients."
+description = "Library for convenient operations on finite field, polynomials, and matrices over finite field."
 readme = "README.md"
 categories = ["algorithms", "mathematics"]
-keyword = ["finite", "field", "polynomial", "operation", "galois", "remainder"]
+keyword = ["finite", "field", "polynomial", "operation", "galois", "remainder","sweep method", "Gaussian elimination","matrix"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

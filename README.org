@@ -5,6 +5,9 @@ A Rust library for operations on finite field, featuring:
 - Obtaining the primitive polynomial
 - Sum, difference, product, quotient, and remainder of polynomial over F_p
 - Sum, difference, product, quotient, and remainder of polynomial over GF(p^n)
+- Sum, product of Matrix F_p
+- Sum, product of Matrix GF(p^n)
+- The sweep method (or Gaussian elimination) of matrices on finite bodies (F_p, GF(p^n)) is also available. 
 
   
 * What makes it different from other libraries?
@@ -13,6 +16,8 @@ A Rust library for operations on finite field, featuring:
 - Can be calculated with F_p, GF(p^n) for any prime and any multiplier, not limited to a char 2.
 - Can freely compute four types of element: prime, Galois, polynomial of prime, and polynomial of Galois.
 - Each can be calculated with +-*/, so you can write natural code.
+- Matrix operations on finite bodies (F_p, GF(p^n)) can also be performed.
+- The sweep method can be available.
   
 ** Cons:
 - It takes longer than other libraries because it is not optimized for each character.
@@ -107,4 +112,42 @@ fn main() {
 #+end_src
 ** Polynomial over GF(p^n)
 Same as above
+** Matrix over FiniteField
+
+#+begin_src rust
+use galois_field::*;
+
+let char = 3;
+let element0: FiniteField = FiniteField {
+    char: char,
+    element: Element::PrimeField { element: 0 },
+};
+let element1: FiniteField = FiniteField {
+    char: char,
+    element: Element::PrimeField { element: 1 },
+};
+let element2: FiniteField = FiniteField {
+    char: char,
+    element: Element::PrimeField { element: 2 },
+};
+
+
+let mut matrix_element:Vec<Vec<FiniteField>> = vec![
+    vec![element0.clone(),element1.clone(), element0.clone()],
+    vec![element2.clone(),element2.clone(), element1.clone()],
+    vec![element1.clone(),element0.clone(), element1.clone()]
+];
+let mut matrix = Matrix{
+    element: matrix_element,
+};
+
+println!("m+m = {:?}", m.clone()+m.clone());
+println!("m*m = {:?}", m.clone()*m.clone());
+
+let mut sweep_matrix = m.sweep_method();
+println!("{:?}", sweep_matrix);
+
+
+
+#+end_src
 
