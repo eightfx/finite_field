@@ -1,19 +1,19 @@
 
 # Table of Contents
 
-1.  [finite fields](#org2df2079)
-2.  [What makes it different from other libraries?](#orgf5d95ae)
-    1.  [Pros:](#org3ed3ff8)
-    2.  [Cons:](#org2253267)
-3.  [Usage](#org8b13c6e)
-4.  [Examples](#org8898fa3)
-    1.  [Prime Field](#org5ca65e2)
-    2.  [Galois Field](#org9699265)
-    3.  [Polynomial over F<sub>p</sub>](#orgf1d408d)
-    4.  [Polynomial over GF(p<sup>n</sup>)](#org1a15151)
+1.  [finite fields](#org0c6032c)
+2.  [What makes it different from other libraries?](#org967e2ae)
+    1.  [Pros:](#org15959d8)
+    2.  [Cons:](#orgd1a6544)
+3.  [Usage](#org5dfe1ed)
+4.  [Examples](#orga2cbc7b)
+    1.  [Prime Field](#org415d4cf)
+    2.  [Galois Field](#orge2ecb95)
+    3.  [Polynomial over F<sub>p</sub>](#org50e4e6d)
+    4.  [Polynomial over GF(p<sup>n</sup>)](#orgd40f06d)
 
 
-<a id="org2df2079"></a>
+<a id="org0c6032c"></a>
 
 # finite fields
 
@@ -26,12 +26,12 @@ A Rust library for operations on finite field, featuring:
 -   Sum, difference, product, quotient, and remainder of polynomial over GF(p<sup>n</sup>)
 
 
-<a id="orgf5d95ae"></a>
+<a id="org967e2ae"></a>
 
 # What makes it different from other libraries?
 
 
-<a id="org3ed3ff8"></a>
+<a id="org15959d8"></a>
 
 ## Pros:
 
@@ -40,29 +40,29 @@ A Rust library for operations on finite field, featuring:
 -   Each can be calculated with +-\*/, so you can write natural code.
 
 
-<a id="org2253267"></a>
+<a id="orgd1a6544"></a>
 
 ## Cons:
 
 -   It takes longer than other libraries because it is not optimized for each character.
 
 
-<a id="org8b13c6e"></a>
+<a id="org5dfe1ed"></a>
 
 # Usage
 
 Add this to your Cargo.toml:
 
     [dependencies]
-    finite_fields = "0.1.2"
+    galois_field = "0.1.3"
 
 
-<a id="org8898fa3"></a>
+<a id="orga2cbc7b"></a>
 
 # Examples
 
 
-<a id="org5ca65e2"></a>
+<a id="org415d4cf"></a>
 
 ## Prime Field
 
@@ -89,7 +89,7 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="org9699265"></a>
+<a id="orge2ecb95"></a>
 
 ## Galois Field
 
@@ -116,7 +116,7 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="orgf1d408d"></a>
+<a id="org50e4e6d"></a>
 
 ## Polynomial over F<sub>p</sub>
 
@@ -151,7 +151,7 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="org1a15151"></a>
+<a id="orgd40f06d"></a>
 
 ## Polynomial over GF(p<sup>n</sup>)
 
