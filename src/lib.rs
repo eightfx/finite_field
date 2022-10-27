@@ -77,8 +77,6 @@
 //! println!("f1 % f2 = {}", f1 % f2);
 //! ```
 
-
-
 use std::ops;
 // type of number , ex: i32
 type NumType = i32;
@@ -107,10 +105,9 @@ pub enum Element {
 
 /// Polynomial over FiniteField.
 ///
-/// Either prime field F_p or Galois field GF(p^n) can be used as coefficients 
+/// Either prime field F_p or Galois field GF(p^n) can be used as coefficients
 #[derive(Debug, Clone)]
 pub struct Polynomial {
-    pub char: u32,
     pub coef: Vec<FiniteField>,
 }
 
@@ -120,99 +117,93 @@ pub struct FiniteField {
     pub element: Element,
 }
 impl Polynomial {
-	pub fn assign_value(&mut self, value: FiniteField) -> FiniteField {
-		// assign value to polynomial
-		// example: f.coef = [0,1,2] i.e. f(x) = 2x^2 + x + 0, then
-		// f.assign_value(2) = 2*2^2 + 2*1 + 2*0 = 8 = 3 (mod 5)
-		let mut result:FiniteField = FiniteField {
-			char: self.char,
-			element: self.coef[0].element.clone(),
-		};
-		
-		let value_origin = value.clone();
-		let mut value = value;
-		for i in 0..self.coef.len() {
-			if i == 0 {
-				result = self.coef[i].clone();
-			}
-			else{
-				result = result + (self.coef[i].clone() * value.clone());
-				value = value * value_origin.clone();
-				
-			}
-		}
-		result
+    pub fn assign_value(&mut self, value: FiniteField) -> FiniteField {
+        // assign value to polynomial
+        // example: f.coef = [0,1,2] i.e. f(x) = 2x^2 + x + 0, then
+        // f.assign_value(2) = 2*2^2 + 2*1 + 2*0 = 8 = 3 (mod 5)
+        let mut result: FiniteField = FiniteField {
+            char: self.coef[0].char,
+            element: self.coef[0].element.clone(),
+        };
 
-	}
-	fn adjust_func(&mut self) -> Polynomial {
-		/* Adjust the function to fit the format
+        let value_origin = value.clone();
+        let mut value = value;
+        for i in 0..self.coef.len() {
+            if i == 0 {
+                result = self.coef[i].clone();
+            } else {
+                result = result + (self.coef[i].clone() * value.clone());
+                value = value * value_origin.clone();
+            }
+        }
+        result
+    }
+    fn adjust_func(&mut self) -> Polynomial {
+        /* Adjust the function to fit the format
 
-		examples:
-		if coef == [] -> coef = [0]
-		if coef == [1,0] -> coef = [1]  i.e. 1 + 0*x -> 1
-		 */
-		let mut coef_inv: Vec<FiniteField> = self.coef.clone();
-		coef_inv.reverse();
-		for _ in 0..coef_inv.len() {
-			if coef_inv[0].is_0() {
-				coef_inv.remove(0);
-			} else {
-				break;
-			}
-		}
-		coef_inv.reverse();
-		if coef_inv.len() == 0 {
-			coef_inv.push(FiniteField {
-				char: self.char,
-				element: self.coef[0].get_0().element,
-			});
-		};
+        examples:
+        if coef == [] -> coef = [0]
+        if coef == [1,0] -> coef = [1]  i.e. 1 + 0*x -> 1
+         */
+        let mut coef_inv: Vec<FiniteField> = self.coef.clone();
+        coef_inv.reverse();
+        for _ in 0..coef_inv.len() {
+            if coef_inv[0].is_0() {
+                coef_inv.remove(0);
+            } else {
+                break;
+            }
+        }
+        coef_inv.reverse();
+        if coef_inv.len() == 0 {
+            coef_inv.push(FiniteField {
+                char: self.coef[0].char,
+                element: self.coef[0].get_0().element,
+            });
+        };
 
-		Polynomial {
-			char: self.char,
-			coef: coef_inv,
-		}
-	}
-	pub fn gcd(&self, other: Polynomial) -> Polynomial {
-		// get GCD of two polynomials
-		// examples:
-		// f.gcd(g) means GCD(f,g)
-		let mut f: Polynomial = self.clone();
-		let mut g: Polynomial = other.clone();
-		let answer: Polynomial;
+        Polynomial { coef: coef_inv }
+    }
+    pub fn gcd(&self, other: Polynomial) -> Polynomial {
+        // get GCD of two polynomials
+        // examples:
+        // f.gcd(g) means GCD(f,g)
+        let mut f: Polynomial = self.clone();
+        let mut g: Polynomial = other.clone();
+        let answer: Polynomial;
 
-		if f.coef.len() < g.coef.len() {
-			(f, g) = (g, f);
-		}
-		loop {
-			f = f.adjust_func();
-			g = g.adjust_func();
+        if f.coef.len() < g.coef.len() {
+            (f, g) = (g, f);
+        }
+        loop {
+            f = f.adjust_func();
+            g = g.adjust_func();
 
-			let mut flag_0 = true;
-			// every coef of g is 0 -> flag_0 = true
-			for i in 0..g.coef.len() {
-				if !g.coef[i].is_0() {
-					flag_0 = false;
-					break;
-				}
-			}
+            let mut flag_0 = true;
+            // every coef of g is 0 -> flag_0 = true
+            for i in 0..g.coef.len() {
+                if !g.coef[i].is_0() {
+                    flag_0 = false;
+                    break;
+                }
+            }
 
-			// end
-			if flag_0 {
-				answer = f;
-				break;
-			}
+            // end
+            if flag_0 {
+                answer = f;
+                break;
+            }
 
-			let remainder = f.clone() % g.clone();
-			(f, g) = (g, remainder);
-		}
+            let remainder = f.clone() % g.clone();
+            (f, g) = (g, remainder);
+        }
 
-		answer
-	}
+        answer
+    }
 }
 impl FiniteField {
     pub fn get_0(&self) -> FiniteField {
-		// get 0 in the same field
+        // get 0 in the same field
         match &self.element {
             Element::PrimeField { element: _ } => FiniteField {
                 char: self.char,
@@ -231,7 +222,7 @@ impl FiniteField {
         }
     }
     pub fn get_1(&self) -> FiniteField {
-		// get 1 in the same field
+        // get 1 in the same field
         match &self.element {
             Element::PrimeField { element: _ } => FiniteField {
                 char: self.char,
@@ -251,7 +242,7 @@ impl FiniteField {
     }
 
     pub fn is_0(&self) -> bool {
-		// check if the element is 0
+        // check if the element is 0
         match &self.element {
             Element::PrimeField { element: e } => *e == 0,
             Element::GaloisField {
@@ -261,7 +252,7 @@ impl FiniteField {
         }
     }
     pub fn is_1(&self) -> bool {
-		// check if the element is 1
+        // check if the element is 1
         match &self.element {
             Element::PrimeField { element: e } => *e == 1,
             Element::GaloisField {
@@ -279,10 +270,7 @@ impl FiniteField {
 impl ops::Add for Polynomial {
     type Output = Polynomial;
     fn add(self, other: Polynomial) -> Polynomial {
-        let mut result = Polynomial {
-            char: self.char,
-            coef: Vec::new(),
-        };
+        let mut result = Polynomial { coef: Vec::new() };
         let max_degree = if self.coef.len() > other.coef.len() {
             self.coef.len()
         } else {
@@ -313,10 +301,7 @@ impl ops::Add for Polynomial {
 impl ops::Sub for Polynomial {
     type Output = Polynomial;
     fn sub(self, other: Polynomial) -> Polynomial {
-        let mut result = Polynomial {
-            char: self.char,
-            coef: Vec::new(),
-        };
+        let mut result = Polynomial { coef: Vec::new() };
         let max_degree = if self.coef.len() > other.coef.len() {
             self.coef.len()
         } else {
@@ -347,7 +332,6 @@ impl ops::Mul for Polynomial {
     fn mul(self, other: Polynomial) -> Polynomial {
         let element0 = self.coef[0].clone().get_0();
         let mut result = Polynomial {
-            char: self.char,
             coef: vec![element0; self.coef.len() + other.coef.len() - 1],
         };
         for i in 0..self.coef.len() {
@@ -362,10 +346,7 @@ impl ops::Mul for Polynomial {
 impl ops::Div for Polynomial {
     type Output = Polynomial;
     fn div(self, other: Polynomial) -> Polynomial {
-        let mut quotient = Polynomial {
-            char: self.char,
-            coef: Vec::new(),
-        };
+        let mut quotient = Polynomial { coef: Vec::new() };
         let mut f_inv = self.coef.clone();
         f_inv.reverse();
         let mut g_inv = other.coef.clone();
@@ -389,7 +370,6 @@ impl ops::Div for Polynomial {
 
         if f_inv.len() < g_inv.len() {
             quotient = Polynomial {
-                char: self.char,
                 coef: vec![self.coef[0].clone().get_0()],
             };
         } else {
@@ -404,7 +384,6 @@ impl ops::Div for Polynomial {
 
         // reverse
         quotient = Polynomial {
-            char: self.char,
             coef: quotient.coef.clone().into_iter().rev().collect(),
         };
         quotient.adjust_func()
@@ -414,10 +393,7 @@ impl ops::Div for Polynomial {
 impl ops::Rem for Polynomial {
     type Output = Polynomial;
     fn rem(self, other: Polynomial) -> Polynomial {
-        let mut quotient = Polynomial {
-            char: self.char,
-            coef: Vec::new(),
-        };
+        let mut quotient = Polynomial { coef: Vec::new() };
         let mut f_inv = self.coef.clone();
         f_inv.reverse();
         let mut g_inv = other.coef.clone();
@@ -441,7 +417,6 @@ impl ops::Rem for Polynomial {
 
         if f_inv.len() < g_inv.len() {
             quotient = Polynomial {
-                char: self.char,
                 coef: vec![self.coef[0].clone().get_0()],
             };
         } else {
@@ -455,23 +430,21 @@ impl ops::Rem for Polynomial {
         }
 
         // drop0
-			for _ in 0..f_inv.len() {
-				if f_inv[0].is_0() {
-					f_inv.remove(0);
-				} else {
-					break;
-				}
-			}
+        for _ in 0..f_inv.len() {
+            if f_inv[0].is_0() {
+                f_inv.remove(0);
+            } else {
+                break;
+            }
+        }
         let mut remainder: Polynomial;
 
         if f_inv.len() == 0 {
             remainder = Polynomial {
-                char: self.char,
                 coef: vec![self.coef[0].clone().get_0()],
             };
         } else {
             remainder = Polynomial {
-                char: self.char,
                 coef: f_inv.clone().into_iter().rev().collect(),
             };
         }
@@ -515,10 +488,7 @@ impl ops::Add for FiniteField {
                 let mut result: Vec<NumType> = Vec::new();
                 let mut f: Vec<NumType> = Vec::new();
                 let mut g: Vec<NumType> = Vec::new();
-                let mut h: Polynomial = Polynomial {
-                    char: self.char,
-                    coef: Vec::new(),
-                };
+                let mut h: Polynomial = Polynomial { coef: Vec::new() };
 
                 // get element from enum
                 if let Element::GaloisField {
@@ -626,10 +596,7 @@ impl ops::Sub for FiniteField {
                 let mut result: Vec<NumType> = Vec::new();
                 let mut f: Vec<NumType> = Vec::new();
                 let mut g: Vec<NumType> = Vec::new();
-                let mut h: Polynomial = Polynomial {
-                    char: self.char,
-                    coef: Vec::new(),
-                };
+                let mut h: Polynomial = Polynomial { coef: Vec::new() };
 
                 // get element from enum
                 if let Element::GaloisField {
@@ -744,10 +711,7 @@ impl ops::Mul for FiniteField {
             } => {
                 let mut f: Vec<NumType> = Vec::new();
                 let mut g: Vec<NumType> = Vec::new();
-                let mut primitive_polynomial: Polynomial = Polynomial {
-                    char: self.char,
-                    coef: Vec::new(),
-                };
+                let mut primitive_polynomial: Polynomial = Polynomial { coef: Vec::new() };
 
                 let element0: Element = Element::PrimeField { element: 0 };
                 let prime0: FiniteField = FiniteField {
@@ -883,10 +847,7 @@ impl ops::Div for FiniteField {
                     element: Element::PrimeField { element: 0 },
                 };
 
-                let mut primitive_polynomial: Polynomial = Polynomial {
-                    char: self.char,
-                    coef: Vec::new(),
-                };
+                let mut primitive_polynomial: Polynomial = Polynomial { coef: Vec::new() };
 
                 // get element from enum
                 if let Element::GaloisField {
@@ -952,10 +913,7 @@ impl ops::Neg for FiniteField {
                 element: _,
                 primitive_polynomial: _,
             } => {
-                let mut primitive_polynomial: Polynomial = Polynomial {
-                    char: self.char,
-                    coef: Vec::new(),
-                };
+                let mut primitive_polynomial: Polynomial = Polynomial { coef: Vec::new() };
                 if let Element::GaloisField {
                     element: _,
                     primitive_polynomial: pp,
@@ -991,7 +949,7 @@ fn drop0(vec: Vec<NumType>) -> Vec<NumType> {
 }
 
 fn extended_euclidean(u: NumType, v: NumType) -> NumType {
-	// Euclidean reciprocal division on real numbers
+    // Euclidean reciprocal division on real numbers
     let mut r0 = u;
     let mut r1 = v;
     let mut s0 = 1;
@@ -1017,11 +975,11 @@ fn extended_euclidean(u: NumType, v: NumType) -> NumType {
     }
 }
 fn change_base_from10_to_n(x: NumType, n: NumType) -> Vec<NumType> {
-	// Generate coefficient lists in sequence.
-	// examples: when x = 1, n = 2, return [1] i.e. 1
-	//                  when x = 2, n = 2, return [0, 1]  i.e. x
-	//                  when x = 3, n = 2, return [1, 1]  i.e. x + 1
-		let mut result = Vec::new();
+    // Generate coefficient lists in sequence.
+    // examples: when x = 1, n = 2, return [1] i.e. 1
+    //                  when x = 2, n = 2, return [0, 1]  i.e. x
+    //                  when x = 3, n = 2, return [1, 1]  i.e. x + 1
+    let mut result = Vec::new();
     let mut x = x;
     while x > 0 {
         result.push(x % n);
@@ -1031,14 +989,11 @@ fn change_base_from10_to_n(x: NumType, n: NumType) -> Vec<NumType> {
 }
 
 pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
-	// get primitive polynomial of GF(q^n)
-	// examples: when char = 2, n = 2, return x^2 + x + 1
-	//                  when char = 2, n = 4, return x^4 + x + 1
-	
-    let mut answer: Polynomial = Polynomial {
-        char: char,
-        coef: Vec::new(),
-    };
+    // get primitive polynomial of GF(q^n)
+    // examples: when char = 2, n = 2, return x^2 + x + 1
+    //                  when char = 2, n = 4, return x^4 + x + 1
+
+    let mut answer: Polynomial = Polynomial { coef: Vec::new() };
 
     for i in 0..(char.pow(n as u32)) {
         // f :nth order monic polynomial on F_p
@@ -1058,10 +1013,7 @@ pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
             });
         }
 
-        let f: Polynomial = Polynomial {
-            char: char,
-            coef: f_vec_ff,
-        };
+        let f: Polynomial = Polynomial { coef: f_vec_ff };
 
         let mut end_flag: bool = true;
 
@@ -1076,10 +1028,7 @@ pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
                 element: Element::PrimeField { element: 1 },
             },
         ];
-        let mut g: Polynomial = Polynomial {
-            char: char,
-            coef: g_vec,
-        };
+        let mut g: Polynomial = Polynomial { coef: g_vec };
 
         for _ in 0..(n / 2) {
             let g_temp: Polynomial = g.clone();
@@ -1130,4 +1079,25 @@ pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
         }
     }
     answer
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::Element;
+    #[cfg(test)]
+    use crate::FiniteField;
+    use crate::Polynomial;
+    fn it_works() {
+        let char: u32 = 2;
+        let element0 = FiniteField {
+            char: char,
+            element: Element::PrimeField { element: 0 },
+        };
+        let element1 = FiniteField {
+            char: char,
+            element: Element::PrimeField { element: 1 },
+        };
+        let answer = element0 + element1;
+    }
 }
