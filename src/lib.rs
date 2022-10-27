@@ -1,7 +1,25 @@
+//! Library for finite body calculations
+//!
+//! finitefields provides utilities to perform operations between Galois Field and between polynomials that have Galois Field as coefficients.
+//!
+//! # Quick Start
+//! # Case 1: Prime Field
+
+
+
 use std::ops;
 // type of number , ex: i32
 type NumType = i32;
 
+/// Element of finite field.
+/// enum Element has two variants: PrimeField and GaloisField.
+/// ## PrimeField
+/// PrimeField is a field that has prime number as its characteristic.
+/// Example: Z/2Z, Z/3Z, Z/5Z, ...
+///
+///  ## GaloisField
+/// GaloisField is a field that has prime power as its characteristic.
+/// Example: GF(2^2), GF(5^3), ...
 #[derive(Debug, Clone)]
 pub enum Element {
     PrimeField {
@@ -970,7 +988,7 @@ pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
         let mut end_flag: bool = true;
 
         // g = x
-        let mut g_vec: Vec<FiniteField> = vec![
+        let g_vec: Vec<FiniteField> = vec![
             FiniteField {
                 char: char,
                 element: Element::PrimeField { element: 0 },
@@ -1021,7 +1039,7 @@ pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
             }
             g_2 = g_2.adjust_func();
 
-            let mut h = Polynomial::gcd(&f, g_2);
+            let h = Polynomial::gcd(&f, g_2);
             if !(h.coef.len() <= 1 && h.coef[0].is_1()) {
                 end_flag = false;
                 break;
