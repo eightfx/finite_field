@@ -25,6 +25,12 @@ pub struct FiniteField {
 }
 impl Polynomial {
     fn adjust_func(&mut self) -> Polynomial {
+		/* Adjust the function to fit the format
+
+		examples:
+		if coef == [] -> coef = [0]
+		if coef == [1,0] -> coef = [1]  i.e. 1 + 0*x -> 1
+		 */
         let mut coef_inv: Vec<FiniteField> = self.coef.clone();
         coef_inv.reverse();
         for i in 0..coef_inv.len() {
@@ -48,6 +54,9 @@ impl Polynomial {
         }
     }
     pub fn gcd(&self, other: Polynomial) -> Polynomial {
+		// get GCD of two polynomials
+		// examples:
+		// f.gcd(g) means GCD(f,g)
         let mut f: Polynomial = self.clone();
         let mut g: Polynomial = other.clone();
         let answer: Polynomial;
@@ -58,7 +67,9 @@ impl Polynomial {
         loop {
             f = f.adjust_func();
             g = g.adjust_func();
+
             let mut flag_0 = true;
+			// every coef of g is 0 -> flag_0 = true
             for i in 0..g.coef.len() {
                 if !g.coef[i].is_0() {
                     flag_0 = false;
@@ -66,26 +77,12 @@ impl Polynomial {
                 }
             }
 
-            // let mut flag_1 = true;
-            // for i in 0..g.coef.len(){
-            // 	if i == 0 && !g.coef[i].is_1(){
-            // 		flag_1 = false;
-            // 		break;
-            // 	}
-            // 	if i != 0 && !g.coef[i].is_0(){
-            // 		flag_1 = false;
-            // 		break;
-            // 	}}
-
-            // if flag_1{
-            // 	answer = g;
-            // 	break;
-            // }
+			// end
             if flag_0 {
                 answer = f;
-
                 break;
             }
+
             let remainder = f.clone() % g.clone();
             (f, g) = (g, remainder);
         }
@@ -95,6 +92,7 @@ impl Polynomial {
 }
 impl FiniteField {
     pub fn get_0(&self) -> FiniteField {
+		// get 0 in the same field
         match &self.element {
             Element::PrimeField { element: _ } => FiniteField {
                 char: self.char,
@@ -113,6 +111,7 @@ impl FiniteField {
         }
     }
     pub fn get_1(&self) -> FiniteField {
+		// get 1 in the same field
         match &self.element {
             Element::PrimeField { element: _ } => FiniteField {
                 char: self.char,
@@ -132,6 +131,7 @@ impl FiniteField {
     }
 
     pub fn is_0(&self) -> bool {
+		// check if the element is 0
         match &self.element {
             Element::PrimeField { element: e } => *e == 0,
             Element::GaloisField {
@@ -141,6 +141,7 @@ impl FiniteField {
         }
     }
     pub fn is_1(&self) -> bool {
+		// check if the element is 1
         match &self.element {
             Element::PrimeField { element: e } => *e == 1,
             Element::GaloisField {
@@ -334,13 +335,13 @@ impl ops::Rem for Polynomial {
         }
 
         // drop0
-        for _ in 0..f_inv.len() {
-            if f_inv[0].is_0() {
-                f_inv.remove(0);
-            } else {
-                break;
-            }
-        }
+			for _ in 0..f_inv.len() {
+				if f_inv[0].is_0() {
+					f_inv.remove(0);
+				} else {
+					break;
+				}
+			}
         let mut remainder: Polynomial;
 
         if f_inv.len() == 0 {
@@ -895,7 +896,11 @@ fn extended_euclidean(u: NumType, v: NumType) -> NumType {
     }
 }
 fn change_base_from10_to_n(x: NumType, n: NumType) -> Vec<NumType> {
-    let mut result = Vec::new();
+	// Generate coefficient lists in sequence.
+	// examples: when x = 1, n = 2, return [1] i.e. 1
+	//                  when x = 2, n = 2, return [0, 1]  i.e. x
+	//                  when x = 3, n = 2, return [1, 1]  i.e. x + 1
+		let mut result = Vec::new();
     let mut x = x;
     while x > 0 {
         result.push(x % n);
@@ -905,6 +910,10 @@ fn change_base_from10_to_n(x: NumType, n: NumType) -> Vec<NumType> {
 }
 
 pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
+	// get primitive polynomial of GF(q^n)
+	// examples: when char = 2, n = 2, return x^2 + x + 1
+	//                  when char = 2, n = 4, return x^4 + x + 1
+	
     let mut answer: Polynomial = Polynomial {
         char: char,
         coef: Vec::new(),
