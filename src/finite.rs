@@ -24,71 +24,95 @@ pub struct FiniteField {
     pub element: Element,
 }
 impl Polynomial {
-    fn adjust_func(&mut self) -> Polynomial {
+	pub fn assign_value(&mut self, value: FiniteField) -> FiniteField {
+		// assign value to polynomial
+		// example: f.coef = [0,1,2] i.e. f(x) = 2x^2 + x + 0, then
+		// f.assign_value(2) = 2*2^2 + 2*1 + 2*0 = 8 = 3 (mod 5)
+		let mut result:FiniteField = FiniteField {
+			char: self.char,
+			element: self.coef[0].element.clone(),
+		};
+		
+		let value_origin = value.clone();
+		let mut value = value;
+		for i in 0..self.coef.len() {
+			if i == 0 {
+				result = self.coef[i].clone();
+			}
+			else{
+				result = result + (self.coef[i].clone() * value.clone());
+				value = value * value_origin.clone();
+				
+			}
+		}
+		result
+
+	}
+	fn adjust_func(&mut self) -> Polynomial {
 		/* Adjust the function to fit the format
 
 		examples:
 		if coef == [] -> coef = [0]
 		if coef == [1,0] -> coef = [1]  i.e. 1 + 0*x -> 1
 		 */
-        let mut coef_inv: Vec<FiniteField> = self.coef.clone();
-        coef_inv.reverse();
-        for i in 0..coef_inv.len() {
-            if coef_inv[0].is_0() {
-                coef_inv.remove(0);
-            } else {
-                break;
-            }
-        }
-        coef_inv.reverse();
-        if coef_inv.len() == 0 {
-            coef_inv.push(FiniteField {
-                char: self.char,
-                element: self.coef[0].get_0().element,
-            });
-        };
+		let mut coef_inv: Vec<FiniteField> = self.coef.clone();
+		coef_inv.reverse();
+		for _ in 0..coef_inv.len() {
+			if coef_inv[0].is_0() {
+				coef_inv.remove(0);
+			} else {
+				break;
+			}
+		}
+		coef_inv.reverse();
+		if coef_inv.len() == 0 {
+			coef_inv.push(FiniteField {
+				char: self.char,
+				element: self.coef[0].get_0().element,
+			});
+		};
 
-        Polynomial {
-            char: self.char,
-            coef: coef_inv,
-        }
-    }
-    pub fn gcd(&self, other: Polynomial) -> Polynomial {
+		Polynomial {
+			char: self.char,
+			coef: coef_inv,
+		}
+	}
+	pub fn gcd(&self, other: Polynomial) -> Polynomial {
 		// get GCD of two polynomials
 		// examples:
 		// f.gcd(g) means GCD(f,g)
-        let mut f: Polynomial = self.clone();
-        let mut g: Polynomial = other.clone();
-        let answer: Polynomial;
+		let mut f: Polynomial = self.clone();
+		let mut g: Polynomial = other.clone();
+		let answer: Polynomial;
 
-        if f.coef.len() < g.coef.len() {
-            (f, g) = (g, f);
-        }
-        loop {
-            f = f.adjust_func();
-            g = g.adjust_func();
+		if f.coef.len() < g.coef.len() {
+			(f, g) = (g, f);
+		}
+		loop {
+			f = f.adjust_func();
+			g = g.adjust_func();
 
-            let mut flag_0 = true;
+			let mut flag_0 = true;
 			// every coef of g is 0 -> flag_0 = true
-            for i in 0..g.coef.len() {
-                if !g.coef[i].is_0() {
-                    flag_0 = false;
-                    break;
-                }
-            }
+			for i in 0..g.coef.len() {
+				if !g.coef[i].is_0() {
+					flag_0 = false;
+					break;
+				}
+			}
 
 			// end
-            if flag_0 {
-                answer = f;
-                break;
-            }
+			if flag_0 {
+				answer = f;
+				break;
+			}
 
-            let remainder = f.clone() % g.clone();
-            (f, g) = (g, remainder);
-        }
+			let remainder = f.clone() % g.clone();
+			(f, g) = (g, remainder);
+		}
 
-        answer
-    }
+		answer
+	}
 }
 impl FiniteField {
     pub fn get_0(&self) -> FiniteField {
@@ -871,6 +895,7 @@ fn drop0(vec: Vec<NumType>) -> Vec<NumType> {
 }
 
 fn extended_euclidean(u: NumType, v: NumType) -> NumType {
+	// Euclidean reciprocal division on real numbers
     let mut r0 = u;
     let mut r1 = v;
     let mut s0 = 1;
@@ -922,7 +947,7 @@ pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
     for i in 0..(char.pow(n as u32)) {
         // f :nth order monic polynomial on F_p
         let mut f_vec: Vec<NumType> = change_base_from10_to_n(i as NumType, char as NumType);
-        for j in 0..(n as usize) - f_vec.len() + 1 {
+        for _ in 0..(n as usize) - f_vec.len() + 1 {
             f_vec.push(0);
         }
         f_vec.pop();
@@ -964,7 +989,7 @@ pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
             let g_temp: Polynomial = g.clone();
 
             // g^p
-            for j in 0..char - 1 {
+            for _ in 0..char - 1 {
                 g = g * g_temp.clone();
             }
 
