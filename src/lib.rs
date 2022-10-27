@@ -4,6 +4,78 @@
 //!
 //! # Quick Start
 //! # Case 1: Prime Field
+//! ```
+//! use finite_field::*;
+//!  let char = 3;
+//! let x:FiniteField = FiniteField {
+//!     char: char,
+//!     element: Element::PrimeField { element: 0 },
+//! },
+//! let y:FiniteField =  FiniteField {
+//!     char: char,
+//!     element: Element::PrimeField { element: 0 },
+//! },
+//! println!("x + y = {}", x + y);
+//! println!("x - y = {}", x - y);
+//! println!("x * y = {}", x * y);
+//! println!("x / y = {}", x / y);
+//! ```
+//!
+//! # Case 2: Galois Field
+//! Remark:
+//! - The source of GF(p^n) is represented by a polynomial basis.
+//!
+//! i.e. 3 = x+1 -> [1,1] over GF(2^4)
+//!
+//! 13 = x^3+x^2+1 -> [1,0,1,1] over GF(2^4)
+//! ```
+//! use finite_field::*;
+//!
+//! // consider GF(2^4)
+//! let char = 2;
+//! let n = 4;
+//! let primitive_polynomial = get_primitive_polynomial(char,n);
+//! let x:FiniteField = FiniteField {
+//!     char: self.char,
+//!     element: Element::PrimeField { element: vec![0,1] }, // i.e. [0,1] = x -> 2 over GF(2^4)
+//! },
+//! let y:FiniteField =  FiniteField {
+//!     char: self.char,
+//!     element: Element::PrimeField { element: [0,0,1,1] }, // i.e. [0,0,1,1] = x^3+x^2 -> 12 over GF(2^4)
+//! },
+//! println!("x + y = {}", x + y);
+//! println!("x - y = {}", x - y);
+//! println!("x * y = {}", x * y);
+//! println!("x / y = {}", x / y);
+//! ```
+//!
+//! # Case 3: Polynomial over Prime Field
+//! ```
+//! use finite_field::*;
+//!
+//! let char = 3;
+//! let element0 = FiniteField {
+//! 	char: char,
+//! 	element: Element::PrimeField { element: 0 }, // i.e. 0 over GF(3)
+//! };
+//! let element1 = FiniteField {
+//! 	char: char,
+//! 	element: Element::PrimeField { element: 1 }, // i.e. 1 over GF(3)
+//! };
+//! let f1: Polynomial = Polynomial {
+//! 	char: char,
+//! 	coef: vec![element0, element1], // i.e. 0 + 1*x
+//! };
+//! let f2: Polynomial = Polynomial {
+//! 	char: char,
+//! 	coef: vec![element0, element1, element1], // i.e. 0 + 1*x + 1*x^2
+//! };
+//! println!("f1 + f2 = {}", f1 + f2);
+//! println!("f1 - f2 = {}", f1 - f2);
+//! println!("f1 * f2 = {}", f1 * f2);
+//! println!("f1 / f2 = {}", f1 / f2);
+//! println!("f1 % f2 = {}", f1 % f2);
+//! ```
 
 
 
@@ -15,10 +87,12 @@ type NumType = i32;
 /// enum Element has two variants: PrimeField and GaloisField.
 /// ## PrimeField
 /// PrimeField is a field that has prime number as its characteristic.
+///
 /// Example: Z/2Z, Z/3Z, Z/5Z, ...
 ///
 ///  ## GaloisField
 /// GaloisField is a field that has prime power as its characteristic.
+///
 /// Example: GF(2^2), GF(5^3), ...
 #[derive(Debug, Clone)]
 pub enum Element {
@@ -30,6 +104,10 @@ pub enum Element {
         primitive_polynomial: Polynomial,
     },
 }
+
+/// Polynomial over FiniteField.
+///
+/// Either prime field F_p or Galois field GF(p^n) can be used as coefficients 
 #[derive(Debug, Clone)]
 pub struct Polynomial {
     pub char: u32,
