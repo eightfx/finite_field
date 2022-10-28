@@ -1195,13 +1195,18 @@ impl ops::Neg for FiniteField {
 
 fn drop0(vec: Vec<NumType>) -> Vec<NumType> {
     let mut vec_inverse = vec.into_iter().rev().collect::<Vec<NumType>>();
-    for _ in 0..vec_inverse.len() - 1 {
-        if vec_inverse[0] != 0 {
-            break;
-        } else {
-            vec_inverse.remove(0);
-        }
-    }
+	if vec_inverse.len() == 0 {
+		vec_inverse.push(0);
+		return vec_inverse;
+	}
+	
+	for _ in 0..vec_inverse.len() - 1 {
+		if vec_inverse[0] != 0 {
+			break;
+		} else {
+			vec_inverse.remove(0);
+		}
+	}
     let vec = vec_inverse.into_iter().rev().collect::<Vec<NumType>>();
     vec
 }
