@@ -14,9 +14,9 @@ A Rust library for operations on finite field, featuring:
 
 ** Pros:
 - Can be calculated with F_p, GF(p^n) for any prime and any multiplier, not limited to a char 2.
-- Can freely compute four types of element: prime, Galois, polynomial of prime, and polynomial of Galois.
+- Can freely compute six types of element: prime field, Galois field, polynomial of prime field, polynomial of Galois field, matrix of prime field, and matrix of Galois field. 
 - Each can be calculated with +-*/, so you can write natural code.
-- Matrix operations on finite bodies (F_p, GF(p^n)) can also be performed.
+- Matrix operations on finite field (F_p, GF(p^n)) can also be performed.
 - The sweep method can be available.
   
 ** Cons:
@@ -26,7 +26,7 @@ A Rust library for operations on finite field, featuring:
 Add this to your Cargo.toml:
 #+begin_src
 [dependencies]
-galois_field = "0.1.5"
+galois_field = "0.1.8"
 #+end_src
 
 * Examples
@@ -34,25 +34,19 @@ galois_field = "0.1.5"
 #+begin_src rust
 use galois_field::*;
 
-fn main() {
-	let char: u32 = 2;
-	let n = 4;
-	
-	let primitive_polynomial = Polynomial::get_primitive_polynomial(char, n);
-	let x:FiniteField = FiniteField{
-		char: char,
-		element:Element::GaloisField{element:vec![0,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,1] = x -> 2 over GF(2^4)
-	};
-	let y:FiniteField = FiniteField{
-		char: char,
-		element:Element::GaloisField{element:vec![0,0,1,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,0,1,1] = x^3 + x^2 -> 12 over GF(2^4)
-	};
-	
-	println!("x + y = {:?}", (x.clone() + y.clone()).element);
-	println!("x - y = {:?}", (x.clone() - y.clone()).element);
-	println!("x * y = {:?}", (x.clone() * y.clone()).element);
-	println!("x / y = {:?}", (x.clone() / y.clone()).element);
-}
+let char: u32 = 5;
+let x:FiniteField = FiniteField{
+	char: char,
+	element:Element::PrimeField{element:0} // 0 in F_5
+};
+let y:FiniteField = FiniteField{
+	char: char,
+	element:Element::PrimeField{element:1} // 1 in F_5
+};
+println!("x + y = {:?}", (x.clone() + y.clone()).element); // ->1
+println!("x - y = {:?}", (x.clone() - y.clone()).element); // -> 4
+println!("x * y = {:?}", (x.clone() * y.clone()).element); // -> 0
+println!("x / y = {:?}", (x.clone() / y.clone()).element); // -> 0
 #+end_src
 ** Galois Field
 #+begin_src rust
@@ -150,6 +144,3 @@ println!("{:?}", sweep_matrix);
 
 
 #+end_src
-* Link
-https://crates.io/crates/galois_field
-

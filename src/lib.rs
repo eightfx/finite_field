@@ -112,7 +112,7 @@
 
 use std::ops;
 // type of number , ex: i32
-type NumType = i32;
+type NumType = i64;
 
 /// Element of finite field.
 /// enum Element has two variants: PrimeField and GaloisField.
@@ -158,21 +158,22 @@ pub struct Matrix {
 }
 
 impl Matrix {
-	fn matrix_visualize(matrix: Matrix) -> Vec<Vec<i64>> {
-		let mut h_num: Vec<Vec<i64>> = Vec::new();
-		for i in 0..matrix.element.len() {
-			let mut tmp: Vec<i64> = Vec::new();
-			for j in 0..matrix.element[0].len() {
-				if let Element::PrimeField{element:e} = matrix.element[i as usize][j as usize].element{
-					tmp.push(e as i64);
-				}
-				
-			}
-			h_num.push(tmp);
-		}
-		h_num
-	}
-
+    /// Extract only the numbers to make the matrix easier to read with println.
+    pub fn matrix_visualize(matrix: Matrix) -> Vec<Vec<i64>> {
+        let mut h_num: Vec<Vec<i64>> = Vec::new();
+        for i in 0..matrix.element.len() {
+            let mut tmp: Vec<i64> = Vec::new();
+            for j in 0..matrix.element[0].len() {
+                if let Element::PrimeField { element: e } =
+                    matrix.element[i as usize][j as usize].element
+                {
+                    tmp.push(e as i64);
+                }
+            }
+            h_num.push(tmp);
+        }
+        h_num
+    }
 
     /// Perform a sweep method (or Gauss-Jordan elimination) on the matrix to get a row-staircase form
     pub fn sweep_method(&self) -> Matrix {
@@ -214,18 +215,16 @@ impl Matrix {
                     matrix.element[k][j] = h_kj - (h_ki * h_ij.clone());
                 }
             }
-
         }
         matrix
     }
 }
 
 impl Polynomial {
+    /// get primitive polynomial of GF(q^n)
+    /// examples: when char = 2, n = 2, return x^2 + x + 1
+    ///                  when char = 2, n = 4, return x^4 + x + 1
     pub fn get_primitive_polynomial(char: u32, n: NumType) -> Polynomial {
-        // get primitive polynomial of GF(q^n)
-        // examples: when char = 2, n = 2, return x^2 + x + 1
-        //                  when char = 2, n = 4, return x^4 + x + 1
-
         let mut answer: Polynomial = Polynomial { coef: Vec::new() };
 
         for i in 0..(char.pow(n as u32)) {
@@ -314,6 +313,9 @@ impl Polynomial {
         answer
     }
 
+    /// Assign a value to the polynomial.
+    /// The coefficients are in ascending order.
+    /// Example: x^2 + 2x + 3 -> [3, 2, 1]
     pub fn assign_value(&mut self, value: FiniteField) -> FiniteField {
         // assign value to polynomial
         // example: f.coef = [0,1,2] i.e. f(x) = 2x^2 + x + 0, then
@@ -335,6 +337,7 @@ impl Polynomial {
         }
         result
     }
+
     fn adjust_func(&mut self) -> Polynomial {
         /* Adjust the function to fit the format
 
@@ -361,10 +364,11 @@ impl Polynomial {
 
         Polynomial { coef: coef_inv }
     }
+
+    /// get GCD of two polynomials
+    /// examples:
+    /// f.gcd(g) means GCD(f,g)
     pub fn gcd(&self, other: Polynomial) -> Polynomial {
-        // get GCD of two polynomials
-        // examples:
-        // f.gcd(g) means GCD(f,g)
         let mut f: Polynomial = self.clone();
         let mut g: Polynomial = other.clone();
         let answer: Polynomial;
@@ -399,6 +403,9 @@ impl Polynomial {
     }
 }
 impl FiniteField {
+    /// Obtain the 0 of the finite field.
+    /// There are two types of finite fields: prime field and galois field.
+    /// This get_0 function is performed on a finite field type to automatically determine which type it is and obtain the 0.
     pub fn get_0(&self) -> FiniteField {
         // get 0 in the same field
         match &self.element {
@@ -418,6 +425,9 @@ impl FiniteField {
             },
         }
     }
+    /// Obtain the 1 of the finite field.
+    /// There are two types of finite fields: prime field and galois field.
+    /// This get_1 function is performed on a finite field type to automatically determine which type it is and obtain the 1.
     pub fn get_1(&self) -> FiniteField {
         // get 1 in the same field
         match &self.element {
@@ -437,7 +447,7 @@ impl FiniteField {
             },
         }
     }
-
+    /// Determine if the FiniteField is 0.
     pub fn is_0(&self) -> bool {
         // check if the element is 0
         match &self.element {
@@ -448,6 +458,8 @@ impl FiniteField {
             } => (e[0] == 0) && (e.len() == 1),
         }
     }
+
+    /// Determine if the FiniteField is 1.
     pub fn is_1(&self) -> bool {
         // check if the element is 1
         match &self.element {
@@ -589,15 +601,19 @@ impl ops::Div for Polynomial {
 
         // drop0
         for i in 0..f_inv.len() {
-			if f_inv.len() <= 1{break;}
-			if f_inv[i].is_0() {
-				f_inv.remove(0);
-			} else {
-				break;
-			}
+            if f_inv.len() <= 1 {
+                break;
+            }
+            if f_inv[i].is_0() {
+                f_inv.remove(0);
+            } else {
+                break;
+            }
         }
         for i in 0..g_inv.len() {
-			if g_inv.len() <= 1{break;}
+            if g_inv.len() <= 1 {
+                break;
+            }
             if g_inv[i].is_0() {
                 g_inv.remove(0);
             } else {
@@ -638,7 +654,9 @@ impl ops::Rem for Polynomial {
 
         // drop0
         for i in 0..f_inv.len() {
-			if f_inv.len() <= 1{break;}
+            if f_inv.len() <= 1 {
+                break;
+            }
             if f_inv[i].is_0() {
                 f_inv.remove(0);
             } else {
@@ -646,7 +664,9 @@ impl ops::Rem for Polynomial {
             }
         }
         for i in 0..g_inv.len() {
-			if g_inv.len() <= 1{break;}
+            if g_inv.len() <= 1 {
+                break;
+            }
             if g_inv[i].is_0() {
                 g_inv.remove(0);
             } else {

@@ -1,21 +1,20 @@
 
 # Table of Contents
 
-1.  [finite fields](#org068f34c)
-2.  [What makes it different from other libraries?](#orgf6d5f0f)
-    1.  [Pros:](#org47b98b4)
-    2.  [Cons:](#orga9135ee)
-3.  [Usage](#org029522d)
-4.  [Examples](#org8c95d1c)
-    1.  [Prime Field](#orgccf1c10)
-    2.  [Galois Field](#orgf02c6c0)
-    3.  [Polynomial over F<sub>p</sub>](#org5b8e57a)
-    4.  [Polynomial over GF(p<sup>n</sup>)](#orge7bbdc3)
-    5.  [Matrix over FiniteField](#orgb027911)
-5.  [Link](#org1821e10)
+1.  [finite fields](#orga024e24)
+2.  [What makes it different from other libraries?](#orgbbe211d)
+    1.  [Pros:](#org8a41299)
+    2.  [Cons:](#orga569078)
+3.  [Usage](#org61362df)
+4.  [Examples](#org9a8ca6a)
+    1.  [Prime Field](#org59a88ab)
+    2.  [Galois Field](#orgfc47c31)
+    3.  [Polynomial over F<sub>p</sub>](#org9238d97)
+    4.  [Polynomial over GF(p<sup>n</sup>)](#org39c376d)
+    5.  [Matrix over FiniteField](#org3b31c25)
 
 
-<a id="org068f34c"></a>
+<a id="orga024e24"></a>
 
 # finite fields
 
@@ -31,72 +30,66 @@ A Rust library for operations on finite field, featuring:
 -   The sweep method (or Gaussian elimination) of matrices on finite bodies (F<sub>p</sub>, GF(p<sup>n</sup>)) is also available.
 
 
-<a id="orgf6d5f0f"></a>
+<a id="orgbbe211d"></a>
 
 # What makes it different from other libraries?
 
 
-<a id="org47b98b4"></a>
+<a id="org8a41299"></a>
 
 ## Pros:
 
 -   Can be calculated with F<sub>p</sub>, GF(p<sup>n</sup>) for any prime and any multiplier, not limited to a char 2.
--   Can freely compute four types of element: prime, Galois, polynomial of prime, and polynomial of Galois.
+-   Can freely compute six types of element: prime field, Galois field, polynomial of prime field, polynomial of Galois field, matrix of prime field, and matrix of Galois field.
 -   Each can be calculated with +-\*/, so you can write natural code.
--   Matrix operations on finite bodies (F<sub>p</sub>, GF(p<sup>n</sup>)) can also be performed.
+-   Matrix operations on finite field (F<sub>p</sub>, GF(p<sup>n</sup>)) can also be performed.
 -   The sweep method can be available.
 
 
-<a id="orga9135ee"></a>
+<a id="orga569078"></a>
 
 ## Cons:
 
 -   It takes longer than other libraries because it is not optimized for each character.
 
 
-<a id="org029522d"></a>
+<a id="org61362df"></a>
 
 # Usage
 
 Add this to your Cargo.toml:
 
     [dependencies]
-    galois_field = "0.1.5"
+    galois_field = "0.1.8"
 
 
-<a id="org8c95d1c"></a>
+<a id="org9a8ca6a"></a>
 
 # Examples
 
 
-<a id="orgccf1c10"></a>
+<a id="org59a88ab"></a>
 
 ## Prime Field
 
     use galois_field::*;
     
-    fn main() {
-    	let char: u32 = 2;
-    	let n = 4;
-    	
-    	let primitive_polynomial = Polynomial::get_primitive_polynomial(char, n);
-    	let x:FiniteField = FiniteField{
-    		char: char,
-    		element:Element::GaloisField{element:vec![0,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,1] = x -> 2 over GF(2^4)
-    	};
-    	let y:FiniteField = FiniteField{
-    		char: char,
-    		element:Element::GaloisField{element:vec![0,0,1,1],primitive_polynomial:primitive_polynomial.clone()} // i.e. [0,0,1,1] = x^3 + x^2 -> 12 over GF(2^4)
-    	};
-    	
-    	println!("x + y = {:?}", (x.clone() + y.clone()).element);
-    	println!("x - y = {:?}", (x.clone() - y.clone()).element);
-    	println!("x * y = {:?}", (x.clone() * y.clone()).element);
-    	println!("x / y = {:?}", (x.clone() / y.clone()).element);
-    }
+    let char: u32 = 5;
+    let x:FiniteField = FiniteField{
+    	char: char,
+    	element:Element::PrimeField{element:0} // 0 in F_5
+    };
+    let y:FiniteField = FiniteField{
+    	char: char,
+    	element:Element::PrimeField{element:1} // 1 in F_5
+    };
+    println!("x + y = {:?}", (x.clone() + y.clone()).element); // ->1
+    println!("x - y = {:?}", (x.clone() - y.clone()).element); // -> 4
+    println!("x * y = {:?}", (x.clone() * y.clone()).element); // -> 0
+    println!("x / y = {:?}", (x.clone() / y.clone()).element); // -> 0
 
 
-<a id="orgf02c6c0"></a>
+<a id="orgfc47c31"></a>
 
 ## Galois Field
 
@@ -123,7 +116,7 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="org5b8e57a"></a>
+<a id="org9238d97"></a>
 
 ## Polynomial over F<sub>p</sub>
 
@@ -158,14 +151,14 @@ Add this to your Cargo.toml:
     }
 
 
-<a id="orge7bbdc3"></a>
+<a id="org39c376d"></a>
 
 ## Polynomial over GF(p<sup>n</sup>)
 
 Same as above
 
 
-<a id="orgb027911"></a>
+<a id="org3b31c25"></a>
 
 ## Matrix over FiniteField
 
@@ -200,11 +193,4 @@ Same as above
     
     let mut sweep_matrix = m.sweep_method();
     println!("{:?}", sweep_matrix);
-
-
-<a id="org1821e10"></a>
-
-# Link
-
-<https://crates.io/crates/galois_field>
 
