@@ -604,7 +604,7 @@ impl ops::Div for Polynomial {
             if f_inv.len() <= 1 {
                 break;
             }
-            if f_inv[i].is_0() {
+            if f_inv[0].is_0() {
                 f_inv.remove(0);
             } else {
                 break;
@@ -614,7 +614,7 @@ impl ops::Div for Polynomial {
             if g_inv.len() <= 1 {
                 break;
             }
-            if g_inv[i].is_0() {
+            if g_inv[0].is_0() {
                 g_inv.remove(0);
             } else {
                 break;
@@ -642,7 +642,6 @@ impl ops::Div for Polynomial {
         quotient.adjust_func()
     }
 }
-
 impl ops::Rem for Polynomial {
     type Output = Polynomial;
     fn rem(self, other: Polynomial) -> Polynomial {
@@ -657,7 +656,7 @@ impl ops::Rem for Polynomial {
             if f_inv.len() <= 1 {
                 break;
             }
-            if f_inv[i].is_0() {
+            if f_inv[0].is_0() {
                 f_inv.remove(0);
             } else {
                 break;
@@ -667,7 +666,7 @@ impl ops::Rem for Polynomial {
             if g_inv.len() <= 1 {
                 break;
             }
-            if g_inv[i].is_0() {
+            if g_inv[0].is_0() {
                 g_inv.remove(0);
             } else {
                 break;

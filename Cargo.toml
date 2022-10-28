@@ -1,9 +1,10 @@
 [package]
 name = "galois_field"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 authors = ["eightt"]
 repository = "https://github.com/eightfx/finite_field"
+documentation = "https://docs.rs/galois_field"
 license = "MIT"
 description = "Library for convenient operations on finite field, polynomials, and matrices over finite field."
 readme = "README.md"
