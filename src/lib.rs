@@ -601,8 +601,8 @@ impl ops::Div for Polynomial {
     type Output = Polynomial;
     fn div(self, other: Polynomial) -> Polynomial {
         let mut quotient = Polynomial { coef: Vec::new() };
-		let mut f = self.clone().adjust_func();
-		let mut g = other.clone().adjust_func();
+		let f = self.clone().adjust_func();
+		let g = other.clone().adjust_func();
 		
 		let mut f_inv = f.coef;
 		f_inv.reverse();
@@ -610,7 +610,7 @@ impl ops::Div for Polynomial {
 		g_inv.reverse();
 
 		// drop0
-		for i in 0..f_inv.len() {
+		for _ in 0..f_inv.len() {
 			if f_inv.len() <= 1 {
 				break;
 			}
@@ -620,7 +620,7 @@ impl ops::Div for Polynomial {
 				break;
 			}
 		}
-		for i in 0..g_inv.len() {
+		for _ in 0..g_inv.len() {
 			if g_inv.len() <= 1 {
 				break;
 			}
@@ -662,7 +662,7 @@ impl ops::Rem for Polynomial {
         g_inv.reverse();
 
         // drop0
-        for i in 0..f_inv.len() {
+        for _ in 0..f_inv.len() {
             if f_inv.len() <= 1 {
                 break;
             }
@@ -672,7 +672,7 @@ impl ops::Rem for Polynomial {
                 break;
             }
         }
-        for i in 0..g_inv.len() {
+        for _ in 0..g_inv.len() {
             if g_inv.len() <= 1 {
                 break;
             }
