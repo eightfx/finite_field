@@ -180,42 +180,43 @@ impl Matrix {
         let n = self.element.len();
         let m = self.element[0].len();
         let mut matrix = self.clone();
+		
 
-        for i in 0..n {
-            // if 0, swap
-            for j in i..n {
-                if !matrix.element[i][i].is_0() {
-                    break;
-                } else {
-                    (matrix.element[i], matrix.element[j]) =
-                        (matrix.element[j].clone(), matrix.element[i].clone());
-                }
-            }
+		for i in 0..n {
+			// if 0, swap
+			for j in i..n {
+				if !matrix.element[i][i].is_0() {
+					break;
+				} else {
+					(matrix.element[i], matrix.element[j]) =
+						(matrix.element[j].clone(), matrix.element[i].clone());
+				}
+			}
 
-            // to1
-            let head = matrix.element[i][i].clone();
-            for j in 0..m {
-                matrix.element[i][j] = matrix.element[i][j].clone() / head.clone();
-            }
+			// to1
+			let head = matrix.element[i][i].clone();
+			for j in 0..m {
+				matrix.element[i][j] = matrix.element[i][j].clone() / head.clone();
+			}
 
-            let mut h_xi: Vec<FiniteField> = Vec::new();
-            for k in 0..n {
-                h_xi.push(matrix.element[k][i].clone());
-            }
+			let mut h_xi: Vec<FiniteField> = Vec::new();
+			for k in 0..n {
+				h_xi.push(matrix.element[k][i].clone());
+			}
 
-            // sub to 0
-            for j in 0..m {
-                let h_ij = matrix.element[i][j].clone();
-                for k in 0..n {
-                    if i == k {
-                        continue;
-                    }
-                    let h_kj = matrix.element[k][j].clone();
-                    let h_ki = h_xi[k].clone();
-                    matrix.element[k][j] = h_kj - (h_ki * h_ij.clone());
-                }
-            }
-        }
+			// sub to 0
+			for j in 0..m {
+				let h_ij = matrix.element[i][j].clone();
+				for k in 0..n {
+					if i == k {
+						continue;
+					}
+					let h_kj = matrix.element[k][j].clone();
+					let h_ki = h_xi[k].clone();
+					matrix.element[k][j] = h_kj - (h_ki * h_ij.clone());
+				}
+			}
+		}
         matrix
     }
 }
@@ -455,8 +456,14 @@ impl FiniteField {
             Element::GaloisField {
                 element: e,
                 primitive_polynomial: _,
-            } => (e[0] == 0) && (e.len() == 1),
-        }
+            } => {
+				if e.len() == 0{
+					return true;
+				}else{
+					
+					(e[0] == 0) && (e.len() == 1)}
+			}
+		}
     }
 
     /// Determine if the FiniteField is 1.
@@ -594,52 +601,55 @@ impl ops::Div for Polynomial {
     type Output = Polynomial;
     fn div(self, other: Polynomial) -> Polynomial {
         let mut quotient = Polynomial { coef: Vec::new() };
-        let mut f_inv = self.coef.clone();
-        f_inv.reverse();
-        let mut g_inv = other.coef.clone();
-        g_inv.reverse();
+		let mut f = self.clone().adjust_func();
+		let mut g = other.clone().adjust_func();
+		
+		let mut f_inv = f.coef;
+		f_inv.reverse();
+		let mut g_inv = g.coef;
+		g_inv.reverse();
 
-        // drop0
-        for i in 0..f_inv.len() {
-            if f_inv.len() <= 1 {
-                break;
-            }
-            if f_inv[0].is_0() {
-                f_inv.remove(0);
-            } else {
-                break;
-            }
-        }
-        for i in 0..g_inv.len() {
-            if g_inv.len() <= 1 {
-                break;
-            }
-            if g_inv[0].is_0() {
-                g_inv.remove(0);
-            } else {
-                break;
-            }
-        }
+		// drop0
+		for i in 0..f_inv.len() {
+			if f_inv.len() <= 1 {
+				break;
+			}
+			else if f_inv[0].is_0() {
+				f_inv.remove(0);
+			} else {
+				break;
+			}
+		}
+		for i in 0..g_inv.len() {
+			if g_inv.len() <= 1 {
+				break;
+			}
+			else if g_inv[0].is_0() {
+				g_inv.remove(0);
+			} else {
+				break;
+			}
+		}
 
-        if f_inv.len() < g_inv.len() {
-            quotient = Polynomial {
-                coef: vec![self.coef[0].clone().get_0()],
-            };
-        } else {
-            for i in 0..f_inv.len() - g_inv.len() + 1 {
-                let temp = f_inv[i].clone() / g_inv[0].clone();
-                for j in 0..g_inv.len() {
-                    f_inv[i + j] = f_inv[i + j].clone() - (temp.clone() * g_inv[j].clone());
-                }
-                quotient.coef.push(temp);
-            }
-        }
+		if f_inv.len() < g_inv.len() {
+			quotient = Polynomial {
+				coef: vec![self.coef[0].clone().get_0()],
+			};
+		} else {
+			for i in 0..f_inv.len() - g_inv.len() + 1 {
+				let temp = f_inv[i].clone() / g_inv[0].clone();
+				for j in 0..g_inv.len() {
+					f_inv[i + j] = f_inv[i + j].clone() - (temp.clone() * g_inv[j].clone());
+				}
+				quotient.coef.push(temp);
+			}
+		}
 
-        // reverse
-        quotient = Polynomial {
-            coef: quotient.coef.clone().into_iter().rev().collect(),
-        };
-        quotient.adjust_func()
+		// reverse
+		quotient = Polynomial {
+			coef: quotient.coef.clone().into_iter().rev().collect(),
+		};
+		quotient.adjust_func()
     }
 }
 impl ops::Rem for Polynomial {
@@ -967,94 +977,102 @@ impl ops::Mul for FiniteField {
                 element: _,
                 primitive_polynomial: _,
             } => {
-                let mut f: Vec<NumType> = Vec::new();
-                let mut g: Vec<NumType> = Vec::new();
-                let mut primitive_polynomial: Polynomial = Polynomial { coef: Vec::new() };
+				let mut f: Vec<NumType> = Vec::new();
+				let mut g: Vec<NumType> = Vec::new();
+				let mut primitive_polynomial: Polynomial = Polynomial { coef: Vec::new() };
 
-                let element0: Element = Element::PrimeField { element: 0 };
-                let prime0: FiniteField = FiniteField {
-                    char: self.char,
-                    element: element0,
-                };
-                // get element from enum
-                if let Element::GaloisField {
-                    element: func_vec,
-                    primitive_polynomial: pp,
-                } = &self.element
-                {
-                    f = func_vec.clone();
-                    primitive_polynomial = pp.clone();
-                }
-                if let Element::GaloisField {
-                    element: func_vec,
-                    primitive_polynomial: pp,
-                } = &other.element
-                {
-                    g = func_vec.clone();
-                    primitive_polynomial = pp.clone();
-                }
-                let mut result = vec![prime0; f.len() + g.len() - 1];
-                for i in 0..f.len() {
-                    for j in 0..g.len() {
-                        let r_tmp = FiniteField {
-                            char: self.char,
-                            element: result[i + j].element.clone(),
-                        };
-                        let f_tmp = FiniteField {
-                            char: self.char,
-                            element: Element::PrimeField { element: f[i] },
-                        };
-                        let g_tmp = FiniteField {
-                            char: self.char,
-                            element: Element::PrimeField { element: g[j] },
-                        };
+			
+				// get element from enum
+				if let Element::GaloisField {
+					element: func_vec,
+					primitive_polynomial: pp,
+				} = &self.element
+				{
+					f = func_vec.clone();
+					primitive_polynomial = pp.clone();
+				}
+				if let Element::GaloisField {
+					element: func_vec,
+					primitive_polynomial: pp,
+				} = &other.element
+				{
+					g = func_vec.clone();
+					primitive_polynomial = pp.clone();
+				}
+				let element0: Element = Element::GaloisField { element: vec![0], primitive_polynomial: primitive_polynomial.clone() };
+				let prime0: FiniteField = FiniteField {
+					char: self.char,
+					element: element0,
+				};
+				if f.len() == 0{
+					f.push(0);
+				}
+				if g.len() == 0{
+					g.push(0);
+				}
+				
+				let mut result = vec![prime0; f.len() + g.len() - 1];
+				for i in 0..f.len() {
+					for j in 0..g.len() {
+						let r_tmp = FiniteField {
+							char: self.char,
+							element: result[i + j].element.clone(),
+						};
+						let f_tmp = FiniteField {
+							char: self.char,
+							element: Element::PrimeField { element: f[i] },
+						};
+						let g_tmp = FiniteField {
+							char: self.char,
+							element: Element::PrimeField { element: g[j] },
+						};
 
-                        result[i + j] = r_tmp + f_tmp * g_tmp;
-                    }
-                }
+						result[i + j] = r_tmp + f_tmp * g_tmp;
+					}
+				}
 
-                let mut result_inv = result.clone();
-                result_inv.reverse();
-                let mut primitive_polynomial_inv = primitive_polynomial.clone();
-                primitive_polynomial_inv.coef.reverse();
+				let mut result_inv = result.clone();
+				result_inv.reverse();
+				let mut primitive_polynomial_inv = primitive_polynomial.clone();
+				primitive_polynomial_inv.coef.reverse();
 
-                if result_inv.len() >= primitive_polynomial_inv.coef.len() {
-                    for i in 0..result_inv.len() - primitive_polynomial_inv.coef.len() + 1 {
-                        let temp = result_inv[i].clone() / primitive_polynomial_inv.coef[0].clone();
-                        for j in 0..primitive_polynomial_inv.coef.len() {
-                            result_inv[i + j] = result_inv[i + j].clone()
-                                - (temp.clone() * primitive_polynomial_inv.coef[j].clone());
-                        }
-                    }
-                }
-                // drop0
-                for _ in 0..result_inv.len() {
-                    if let Element::PrimeField { element: a } = result_inv[0].element {
-                        if a != 0 {
-                            break;
-                        } else {
-                            result_inv.remove(0);
-                        }
-                    }
-                }
-                let mut result = result_inv.clone();
-                result.reverse();
+				if result_inv.len() >= primitive_polynomial_inv.coef.len() {
+					for i in 0..result_inv.len() - primitive_polynomial_inv.coef.len() + 1 {
+						let temp = result_inv[i].clone() / primitive_polynomial_inv.coef[0].clone();
+						for j in 0..primitive_polynomial_inv.coef.len() {
+							result_inv[i + j] = result_inv[i + j].clone()
+								- (temp.clone() * primitive_polynomial_inv.coef[j].clone());
+						}
+					}
+				}
+				// drop0
+				for _ in 0..result_inv.len() {
+					if let Element::PrimeField { element: a } = result_inv[0].element {
+						if a != 0 {
+							break;
+						} else {
+							result_inv.remove(0);
+						}
+					}
+				}
+				let mut result = result_inv.clone();
+				result.reverse();
 
-                // PrimeField -> NumType
-                let mut result_num: Vec<NumType> = Vec::new();
-                for i in 0..result.len() {
-                    if let Element::PrimeField { element: a } = result[i].element {
-                        result_num.push(a);
-                    }
-                }
+				// PrimeField -> NumType
+				let mut result_num: Vec<NumType> = Vec::new();
+				for i in 0..result.len() {
+					if let Element::PrimeField { element: a } = result[i].element {
+						result_num.push(a);
+					}
+				}
 
-                FiniteField {
-                    char: self.char,
-                    element: Element::GaloisField {
-                        element: result_num,
-                        primitive_polynomial: primitive_polynomial,
-                    },
-                }
+				FiniteField {
+					char: self.char,
+					element: Element::GaloisField {
+						element: result_num,
+						primitive_polynomial: primitive_polynomial,
+					},
+				}
             }
         }
     }
